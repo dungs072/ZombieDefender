@@ -6,11 +6,16 @@ public class Weapon : MonoBehaviour, IProduct
     [SerializeField] protected int damage;
     [SerializeField] protected float attackRate;
     [SerializeField] protected string attackAnimName;
+    [SerializeField] protected string locomotionAnimName;
     protected bool canAttack = true;
 
     public GameObject GetGameObject()
     {
         return gameObject;
+    }
+    public string GetLocomotionAnimName()
+    {
+        return locomotionAnimName;
     }
 
     public void Operation()

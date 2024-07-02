@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-public class InputHandler : MonoBehaviour
+public class InputHandler : NetworkBehaviour
 {
     private Actions actions;
     public Vector2 MovementInput { get; private set; }
@@ -11,19 +12,23 @@ public class InputHandler : MonoBehaviour
         actions = new Actions();
 
     }
-    private void OnEnable()
+    public override void OnNetworkSpawn()
     {
+        if (!IsOwner) { return; }
         actions.Enable();
 
         actions.Player.Attack.performed += OnAttack;
         actions.Player.Attack.canceled += OnAttack;
     }
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
+        if (!IsOwner) { return; }
         actions.Disable();
     }
+
     private void Update()
     {
+        if (!IsOwner) { return; }
         MovementInput = actions.Player.Movement.ReadValue<Vector2>();
     }
 

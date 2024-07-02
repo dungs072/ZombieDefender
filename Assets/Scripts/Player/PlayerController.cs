@@ -7,8 +7,10 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private Movement movement;
     [SerializeField] private Fighter fighter;
     [SerializeField] private PlayerAnimator animator;
+
     private void Update()
     {
+        if (!IsOwner) { return; }
         HandleRotation();
         HandleMovement();
         Fight();
