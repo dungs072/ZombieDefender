@@ -7,12 +7,14 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private Movement movement;
     [SerializeField] private Fighter fighter;
     [SerializeField] private PlayerAnimator animator;
+    [SerializeField] private WeaponManager weaponManager;
 
     private void Update()
     {
         if (!IsOwner) { return; }
         HandleRotation();
         HandleMovement();
+        HandleSwitchWeapon();
         Fight();
     }
     private void HandleRotation()
@@ -32,6 +34,18 @@ public class PlayerController : NetworkBehaviour
             movement.Move(inputHandler.MovementInput);
         }
         animator.PlayLocomtionAnimation(inputHandler.MovementInput != Vector2.zero);
+    }
+    private void HandleSwitchWeapon()
+    {
+
+        if (inputHandler.MouseScrollY > 0)
+        {
+            weaponManager.ChangeUpWeapon();
+        }
+        if (inputHandler.MouseScrollY < 0)
+        {
+            weaponManager.ChangeDownWeapon();
+        }
     }
     private void Fight()
     {

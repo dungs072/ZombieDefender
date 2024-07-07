@@ -9,4 +9,5 @@ public class Movement : MonoBehaviour
         transform.position = new Vector2(transform.position.x + direction.x, 
                                         transform.position.y + direction.y);
     }
+    
 }

@@ -1,5 +1,5 @@
 {
-    "name": "Action",
+    "name": "Actions",
     "maps": [
         {
             "name": "Player",
@@ -19,6 +19,15 @@
                     "type": "Button",
                     "id": "1fa42488-1525-427d-b047-7088f0cdf4c2",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MouseScrollY",
+                    "type": "PassThrough",
+                    "id": "533b438b-65b3-4a5b-9124-e319d9b2ef60",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -143,6 +152,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "85d6d130-fad5-4278-b10c-418b291d8eca",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseScrollY",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

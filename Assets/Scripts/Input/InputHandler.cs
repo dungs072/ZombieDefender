@@ -6,6 +6,7 @@ public class InputHandler : NetworkBehaviour
     private Actions actions;
     public Vector2 MovementInput { get; private set; }
     public Vector2 MousePosition { get { return Mouse.current.position.ReadValue(); } }
+    public float MouseScrollY { get; private set; }
     public bool CanAttack { get; private set; }
     private void Awake()
     {
@@ -19,6 +20,7 @@ public class InputHandler : NetworkBehaviour
 
         actions.Player.Attack.performed += OnAttack;
         actions.Player.Attack.canceled += OnAttack;
+        actions.Player.MouseScrollY.performed += (x) => MouseScrollY = x.ReadValue<float>();
     }
     public override void OnNetworkDespawn()
     {
