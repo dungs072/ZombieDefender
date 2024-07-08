@@ -9,6 +9,14 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private PlayerAnimator animator;
     [SerializeField] private WeaponManager weaponManager;
 
+    public override void OnNetworkSpawn()
+    {
+        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
+    }
+    public override void OnNetworkDespawn()
+    {
+        ((CustomNetworkManager)NetworkManager.Singleton).RemovePlayer(this);
+    }
     private void Update()
     {
         if (!IsOwner) { return; }
@@ -53,7 +61,9 @@ public class PlayerController : NetworkBehaviour
         {
             fighter.Attack();
         }
-
     }
 
+
+
 }
+

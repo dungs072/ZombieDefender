@@ -4,11 +4,11 @@ using UnityEngine.UI;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    private NetworkManager m_NetworkManager;
+    private CustomNetworkManager m_NetworkManager;
 
     void Awake()
     {
-        m_NetworkManager = GetComponent<NetworkManager>();
+        m_NetworkManager = GetComponent<CustomNetworkManager>();
     }
 
     void OnGUI()

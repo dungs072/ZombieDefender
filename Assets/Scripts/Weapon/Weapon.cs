@@ -1,6 +1,7 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
-public class Weapon : MonoBehaviour, IProduct
+public class Weapon : NetworkBehaviour, IProduct
 {
     public event Action<string> AttackingWeapon;
     [SerializeField] protected int damage;
