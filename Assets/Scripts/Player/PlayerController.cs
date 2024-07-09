@@ -9,13 +9,23 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private PlayerAnimator animator;
     [SerializeField] private WeaponManager weaponManager;
 
-    public override void OnNetworkSpawn()
+    private void Start()
     {
         ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
     }
-    public override void OnNetworkDespawn()
+    public override void OnDestroy()
     {
         ((CustomNetworkManager)NetworkManager.Singleton).RemovePlayer(this);
+        base.OnDestroy();
+
+    }
+    public override void OnNetworkSpawn()
+    {
+
+    }
+    public override void OnNetworkDespawn()
+    {
+
     }
     private void Update()
     {

@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class CustomNetworkManager : NetworkManager
         if (player.IsOwner)
         {
             OwnerPlayer = player;
+            Debug.Log(OwnerPlayer);
         }
         players.Add(player);
     }
