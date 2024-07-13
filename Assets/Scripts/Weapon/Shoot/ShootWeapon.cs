@@ -5,7 +5,6 @@ public class ShootWeapon : Weapon
 {
     [SerializeField] private Projectile projectile;
     [SerializeField] private Transform shootPos;
-
     protected override void Attack()
     {
         base.Attack();
@@ -26,6 +25,7 @@ public class ShootWeapon : Weapon
         var projectileInstance = NetworkObjectPool.Singleton.
                                      GetNetworkObject(projectile.gameObject,
                                          shootPos.position, shootPos.rotation);
+        projectileInstance.GetComponent<Projectile>().SetDamage(damage);
         if (projectileInstance.IsSpawned)
         {
             Projectile projectile = projectileInstance.GetComponent<Projectile>();

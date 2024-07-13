@@ -31,7 +31,11 @@ public class AIManager : NetworkBehaviour
         if (players == null) { return; }
         foreach (var ai in aIControllers)
         {
-            ai.MoveToTarget();
+            if (ai.isActiveAndEnabled)
+            {
+                ai.UpdateAI();
+            }
+
         }
 
     }

@@ -35,7 +35,7 @@ public class WeaponManager : MonoBehaviour
         }
         CurrentWeapon = weapon;
         CurrentWeapon.AttackingWeapon += playerAnimator.PlayAttackAnimation;
-        playerAnimator.SetCurrentLocomotion(weapon.GetLocomotionAnimName());
+        playerAnimator.SetAnimatorOverride(CurrentWeapon.GetAnimatorOverrideController());
     }
 
 }

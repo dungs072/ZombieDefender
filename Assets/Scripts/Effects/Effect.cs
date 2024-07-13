@@ -1,23 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-[RequireComponent(typeof(NetworkObject))]
-public class Projectile : NetworkBehaviour
-{
-    [SerializeField] private Effect bloodHitEffect;
-    [SerializeField] private ReferenceItself referenceItself;
-    [SerializeField] private float speed = 10f;
-    [SerializeField] private float lifetime = 2f;
-    private NetworkObjectPool pool;
-    private int damage = 1;
 
-    public void SetDamage(int damage)
-    {
-        this.damage = damage;
-    }
+public class Effect : NetworkBehaviour
+{
+    [SerializeField] private float lifetime = 4;
+    [SerializeField] private ReferenceItself referenceItself;
+    [SerializeField] private Animator animator;
+    private NetworkObjectPool pool;
     private void Start()
     {
         pool = NetworkObjectPool.Singleton;
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        lifetime = stateInfo.length;
     }
+
     public override void OnNetworkSpawn()
     {
         if (!IsServer) { return; }
@@ -39,15 +38,8 @@ public class Projectile : NetworkBehaviour
         if (!IsServer) { return; }
         CancelInvoke();
     }
-
-    private void Update()
-    {
-        transform.Translate(Vector3.right * speed * Time.deltaTime);
-    }
-
     private void Deactivate()
     {
-
         pool.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
         ToggleGameObjectClientRpc(false);
     }
@@ -57,6 +49,7 @@ public class Projectile : NetworkBehaviour
         if (IsServer) { return; }
         gameObject.SetActive(state);
     }
+
     [Rpc(SendTo.ClientsAndHost)]
     public void SetPositionClientRpc(Vector3 position)
     {
@@ -68,35 +61,5 @@ public class Projectile : NetworkBehaviour
     {
         if (IsServer) { return; }
         transform.rotation = rotation;
-    }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!IsServer) { return; }
-
-        if (other.TryGetComponent(out Health health))
-        {
-            health.TakeDamage(damage);
-        }
-
-        SpawnEffect();
-        Deactivate();
-    }
-    private void SpawnEffect()
-    {
-        var effectInstance = NetworkObjectPool.Singleton.
-                                  GetNetworkObject(bloodHitEffect.gameObject,
-                                      transform.position, transform.rotation);
-        if (effectInstance.IsSpawned)
-        {
-
-            var effect = effectInstance.GetComponent<Effect>();
-            effect.ToggleGameObjectClientRpc(true);
-            effect.SetPositionClientRpc(transform.position);
-            effect.SetRotationClientRpc(transform.rotation);
-        }
-        else
-        {
-            effectInstance.Spawn(true);
-        }
     }
 }

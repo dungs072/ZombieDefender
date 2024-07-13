@@ -5,8 +5,7 @@ using UnityEngine;
 public class PlayerAnimator : MonoBehaviour
 {
     private readonly int LocomotionValueHash = Animator.StringToHash("Locomotion");
-    private readonly int GunLocomotionHash = Animator.StringToHash("GunLocomotion");
-    private readonly int LocomotionHash = Animator.StringToHash("KnifeLocomotion");
+    private readonly int AttackHash = Animator.StringToHash("Attack");
     private readonly float CrossFadeInFixedTime = 0.1f;
     [SerializeField] private Animator animator;
 
@@ -15,16 +14,19 @@ public class PlayerAnimator : MonoBehaviour
     {
         animator.SetFloat(LocomotionValueHash, isMoving ? 1 : 0);
     }
-    public void PlayAttackAnimation(string attackAnimName)
+    public void PlayAttackAnimation()
     {
-        animator.CrossFadeInFixedTime(attackAnimName, CrossFadeInFixedTime);
+        animator.CrossFadeInFixedTime(AttackHash, CrossFadeInFixedTime);
+    }
+    public void SetAnimatorOverride(AnimatorOverrideController animatorOverride)
+    {
+        if (animatorOverride != null)
+        {
+            animator.runtimeAnimatorController = animatorOverride;
+        }
     }
 
-    public void SetCurrentLocomotion(string locomotionValue)
-    {
-        int currentLocomotionHash = Animator.StringToHash(locomotionValue);
-        animator.CrossFadeInFixedTime(currentLocomotionHash, CrossFadeInFixedTime);
-    }
+
 
 
 }

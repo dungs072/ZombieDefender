@@ -3,20 +3,19 @@ using Unity.Netcode;
 using UnityEngine;
 public class Weapon : NetworkBehaviour, IProduct
 {
-    public event Action<string> AttackingWeapon;
+    public event Action AttackingWeapon;
     [SerializeField] protected int damage;
     [SerializeField] protected float attackRate;
-    [SerializeField] protected string attackAnimName;
-    [SerializeField] protected string locomotionAnimName;
+    [SerializeField] private AnimatorOverrideController overrideAnimator;
     protected bool canAttack = true;
 
+    public AnimatorOverrideController GetAnimatorOverrideController()
+    {
+        return overrideAnimator;
+    }
     public GameObject GetGameObject()
     {
         return gameObject;
-    }
-    public string GetLocomotionAnimName()
-    {
-        return locomotionAnimName;
     }
 
     public void Operation()
@@ -31,7 +30,7 @@ public class Weapon : NetworkBehaviour, IProduct
     }
     protected virtual void Attack()
     {
-        AttackingWeapon?.Invoke(attackAnimName);
+        AttackingWeapon?.Invoke();
     }
     private void ResetAttack()
     {
