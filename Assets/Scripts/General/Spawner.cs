@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Spawner : NetworkBehaviour
 {
     public event Action<NetworkObject> AISpawned;
-    [SerializeField] private GameObject prefab;
+    [SerializeField] private List<GameObject> prefabs;
     [SerializeField] private float maxTimeToSpawn = 5f;
     [SerializeField] private float radius = 10f;
 
@@ -28,16 +29,17 @@ public class Spawner : NetworkBehaviour
     {
         Vector3 randomPosition = GetRandomPosition();
         randomPosition.z = 0;
+        int randomIndex = UnityEngine.Random.Range(0, prefabs.Count);
         var instance = NetworkObjectPool.Singleton.
-                                    GetNetworkObject(prefab,
+                                    GetNetworkObject(prefabs[randomIndex],
                                         randomPosition, transform.rotation);
         AISpawned?.Invoke(instance);
         if (instance.IsSpawned)
         {
-            // Projectile projectile = projectileInstance.GetComponent<Projectile>();
-            // projectile.ToggleGameObjectClientRpc(true);
-            // projectile.SetPositionClientRpc(shootPos.position);
-            // projectile.SetRotationClientRpc(shootPos.rotation);
+            AIController aiController = instance.GetComponent<AIController>();
+            aiController.ToggleGameObjectClientRpc(true);
+            aiController.SetPositionClientRpc(randomPosition);
+            aiController.SetRotationClientRpc(transform.rotation);
         }
         else
         {

@@ -1,7 +1,10 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
+    public static event Action<PlayerController> PlayerSpawned;
+    public static event Action<PlayerController> PlayerDespawned;
     [SerializeField] private float rotationSpeed = 10;
     [SerializeField] private InputHandler inputHandler;
     [SerializeField] private Movement movement;
@@ -21,11 +24,13 @@ public class PlayerController : NetworkBehaviour
     }
     public override void OnNetworkSpawn()
     {
-
+        if (!IsOwner) return;
+        PlayerSpawned?.Invoke(this);
     }
     public override void OnNetworkDespawn()
     {
-
+        if (!IsOwner) return;
+        PlayerDespawned?.Invoke(this);
     }
     private void Update()
     {

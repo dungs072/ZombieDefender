@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Health : NetworkBehaviour
 {
+    public event Action<int, int> HealthChanged;
     public event Action CharacterDied;
     [SerializeField] private int maxHealth = 100;
     private int currentHealth = 0;
@@ -15,11 +16,16 @@ public class Health : NetworkBehaviour
     {
         Reset();
     }
+    private void Start()
+    {
+        Reset();
+    }
     public void TakeDamage(int damage)
     {
-        if (!IsServer) { return; }
+        if (!IsServer || !IsOwner) { return; }
         if (currentHealth == 0) { return; }
         currentHealth = Mathf.Max(currentHealth - damage, 0);
+        HealthChanged?.Invoke(currentHealth, maxHealth);
         if (currentHealth <= 0)
         {
             CharacterDied?.Invoke();
@@ -30,6 +36,8 @@ public class Health : NetworkBehaviour
     {
         currentHealth = maxHealth;
         IsDead = false;
+        HealthChanged?.Invoke(currentHealth, maxHealth);
     }
+
 
 }

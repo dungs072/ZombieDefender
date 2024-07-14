@@ -57,7 +57,8 @@ public class AIManager : NetworkBehaviour
     public void AddAI(AIController ai)
     {
         aIControllers.Add(ai);
-        SetTargets(players[0].transform);
+        int randomIndex = Random.Range(0, players.Count);
+        SetTargets(players[randomIndex].transform);
     }
     public void RemoveAI(AIController ai)
     {

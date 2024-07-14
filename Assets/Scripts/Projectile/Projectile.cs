@@ -76,9 +76,10 @@ public class Projectile : NetworkBehaviour
         if (other.TryGetComponent(out Health health))
         {
             health.TakeDamage(damage);
+            SpawnEffect();
         }
 
-        SpawnEffect();
+
         Deactivate();
     }
     private void SpawnEffect()

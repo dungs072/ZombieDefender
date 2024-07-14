@@ -5,10 +5,12 @@ using UnityEngine;
 
 public class AIController : NetworkBehaviour
 {
+    [SerializeField] private HandColliderManager handColliderManager;
     [SerializeField] private Health health;
     [SerializeField] private AIFighter fighter;
     [SerializeField] private AIMovement movement;
     [SerializeField] private AIAnimator animator;
+    [SerializeField] private SpriteRenderer model;
     [SerializeField] private ReferenceItself referenceItself;
 
     [SerializeField] private float disappearTimeWhenDie = 5f;
@@ -29,7 +31,13 @@ public class AIController : NetworkBehaviour
         animator.PlayIdleAnimation();
         movement.ToggleStop(false);
         movement.SetCanMove(true);
-        GetComponent<Collider2D>().enabled = true;
+        if (IsServer)
+        {
+            ToggleColliderClientRpc(true);
+            ToggleGameobjectClientRpc(true);
+        }
+
+        handColliderManager.ToggleHandColliders(true);
 
     }
 
@@ -76,14 +84,22 @@ public class AIController : NetworkBehaviour
     {
         animator.PlayDeathAnimation();
         movement.ToggleStop(true);
-        GetComponent<Collider2D>().enabled = false;
+        handColliderManager.ToggleHandColliders(false);
+        ToggleColliderClientRpc(false);
+
         Invoke(nameof(HandleDie), disappearTimeWhenDie);
     }
     private void HandleDie()
     {
         movement.SetCanMove(false);
-        pool.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
 
+        ToggleGameobjectClientRpc(false);
+
+        Invoke(nameof(HandleReturnToPool), 1f);
+    }
+    private void HandleReturnToPool()
+    {
+        pool.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
     }
     private bool IsNearTarget(float distance)
     {
@@ -91,7 +107,36 @@ public class AIController : NetworkBehaviour
         if (target == null) { return false; }
         return (target.position - transform.position).sqrMagnitude <= distance * distance;
     }
+    [Rpc(SendTo.Everyone)]
+    private void ToggleGameobjectClientRpc(bool state)
+    {
+        gameObject.SetActive(state);
+    }
 
+    [Rpc(SendTo.Everyone)]
+    private void ToggleColliderClientRpc(bool state)
+    {
+        GetComponent<Collider2D>().enabled = state;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ToggleGameObjectClientRpc(bool state)
+    {
+        if (IsServer) { return; }
+        gameObject.SetActive(state);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetPositionClientRpc(Vector3 position)
+    {
+        if (IsServer) { return; }
+        transform.position = position;
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetRotationClientRpc(Quaternion rotation)
+    {
+        if (IsServer) { return; }
+        transform.rotation = rotation;
+    }
 
 
 }
