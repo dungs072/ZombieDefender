@@ -21,11 +21,9 @@ public class AIMovement : MonoBehaviour
     }
     public void RotateToTarget(Vector3 targetPosition)
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        direction.z = 0;
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+        Quaternion neededRotation = Quaternion.LookRotation(Vector3.forward, targetPosition - transform.position);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, neededRotation, Time.deltaTime * rotationSpeed);
     }
 
 }

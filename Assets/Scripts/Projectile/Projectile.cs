@@ -3,10 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class Projectile : NetworkBehaviour
 {
-    [SerializeField] private Effect bloodHitEffect;
+    [SerializeField] private Effect damageHitEffect;
     [SerializeField] private ReferenceItself referenceItself;
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 2f;
+    [SerializeField] private bool isMakingDamage;
     private NetworkObjectPool pool;
     private int damage = 1;
 
@@ -42,12 +43,11 @@ public class Projectile : NetworkBehaviour
 
     private void Update()
     {
-        transform.Translate(Vector3.right * speed * Time.deltaTime);
+        transform.position += transform.up * speed * Time.deltaTime;
     }
 
     private void Deactivate()
     {
-
         pool.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
         ToggleGameObjectClientRpc(false);
     }
@@ -75,25 +75,34 @@ public class Projectile : NetworkBehaviour
 
         if (other.TryGetComponent(out Health health))
         {
-            health.TakeDamage(damage);
-            SpawnEffect();
+            if (isMakingDamage)
+            {
+                health.TakeDamage(damage);
+                SpawnEffect(health.transform);
+            }
         }
+
+
 
 
         Deactivate();
     }
-    private void SpawnEffect()
+
+    protected virtual void SpawnEffect(Transform target = null)
     {
+        Transform newTransform = target == null ? transform : target;
         var effectInstance = NetworkObjectPool.Singleton.
-                                  GetNetworkObject(bloodHitEffect.gameObject,
-                                      transform.position, transform.rotation);
+                                  GetNetworkObject(damageHitEffect.gameObject,
+                                      newTransform.position, newTransform.rotation);
         if (effectInstance.IsSpawned)
         {
 
             var effect = effectInstance.GetComponent<Effect>();
+            Debug.Log(effect);
+            if (effect == null) { return; }
             effect.ToggleGameObjectClientRpc(true);
-            effect.SetPositionClientRpc(transform.position);
-            effect.SetRotationClientRpc(transform.rotation);
+            effect.SetPositionClientRpc(newTransform.position);
+            effect.SetRotationClientRpc(newTransform.rotation);
         }
         else
         {

@@ -45,10 +45,8 @@ public class PlayerController : NetworkBehaviour
         Vector2 mouseScreenPosition = inputHandler.MousePosition;
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mouseScreenPosition);
         Vector3 direction = (worldPosition - transform.position).normalized;
-        direction.z = 0;
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+        Quaternion neededRotation = Quaternion.LookRotation(Vector3.forward, direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, neededRotation, Time.deltaTime * rotationSpeed);
     }
     private void HandleMovement()
     {
