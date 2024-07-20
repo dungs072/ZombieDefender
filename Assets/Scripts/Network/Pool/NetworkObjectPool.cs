@@ -8,7 +8,7 @@ public class NetworkObjectPool : NetworkBehaviour
     public static NetworkObjectPool Singleton { get; private set; }
     [SerializeField] List<PoolConfigObject> PooledPrefabList;
     private HashSet<GameObject> m_Prefabs = new HashSet<GameObject>();
-    private Dictionary<GameObject, ObjectPool<NetworkObject>> m_PooledObjects = new Dictionary<GameObject, ObjectPool<NetworkObject>>();
+    private Dictionary<GameObject, ObjectPoolWrapper<NetworkObject>> m_PooledObjects = new Dictionary<GameObject, ObjectPoolWrapper<NetworkObject>>();
 
     public void Awake()
     {
@@ -84,8 +84,8 @@ public class NetworkObjectPool : NetworkBehaviour
             Destroy(networkObject.gameObject);
         }
         m_Prefabs.Add(prefab);
-        m_PooledObjects[prefab] = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy, defaultCapacity: prewarmCount);
-
+        var pool = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy, defaultCapacity: prewarmCount);
+        m_PooledObjects[prefab] = new ObjectPoolWrapper<NetworkObject>(pool);
         var prewarmNetworkObjects = new List<NetworkObject>();
         for (int i = 0; i < prewarmCount; i++)
         {

@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
@@ -8,7 +9,6 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private bool isMakingDamage;
-    private NetworkObjectPool pool;
     private int damage = 1;
 
     public void SetDamage(int damage)
@@ -17,7 +17,7 @@ public class Projectile : NetworkBehaviour
     }
     private void Start()
     {
-        pool = NetworkObjectPool.Singleton;
+
     }
     public override void OnNetworkSpawn()
     {
@@ -48,7 +48,8 @@ public class Projectile : NetworkBehaviour
 
     private void Deactivate()
     {
-        pool.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
+        NetworkObjectPool.Singleton.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
+        gameObject.SetActive(false);
         ToggleGameObjectClientRpc(false);
     }
     [Rpc(SendTo.ClientsAndHost)]
@@ -82,9 +83,6 @@ public class Projectile : NetworkBehaviour
             }
         }
 
-
-
-
         Deactivate();
     }
 
@@ -97,12 +95,14 @@ public class Projectile : NetworkBehaviour
         if (effectInstance.IsSpawned)
         {
 
-            var effect = effectInstance.GetComponent<Effect>();
-            Debug.Log(effect);
-            if (effect == null) { return; }
-            effect.ToggleGameObjectClientRpc(true);
-            effect.SetPositionClientRpc(newTransform.position);
-            effect.SetRotationClientRpc(newTransform.rotation);
+            if (effectInstance.TryGetComponent(out Effect effect))
+            {
+
+                effect.ToggleGameObjectClientRpc(true);
+                effect.SetPositionClientRpc(newTransform.position);
+                effect.SetRotationClientRpc(newTransform.rotation);
+            }
+
         }
         else
         {

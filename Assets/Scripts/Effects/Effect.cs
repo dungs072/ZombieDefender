@@ -8,13 +8,18 @@ public class Effect : NetworkBehaviour
     [SerializeField] private float lifetime = 4;
     [SerializeField] private ReferenceItself referenceItself;
     [SerializeField] private Animator animator;
+
     private NetworkObjectPool pool;
     private void Start()
     {
         pool = NetworkObjectPool.Singleton;
 
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        lifetime = stateInfo.length;
+        if (lifetime == -1)
+        {
+            lifetime = stateInfo.length;
+        }
+
     }
 
     public override void OnNetworkSpawn()

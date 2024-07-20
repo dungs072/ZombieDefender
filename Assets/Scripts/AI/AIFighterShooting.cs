@@ -7,7 +7,7 @@ public class AIFighterShooting : AIFighter
     [SerializeField] private Projectile projectile;
     [SerializeField] private Transform shootPos;
     [SerializeField] private float maxTimeToSpawn = 10f;
-    private float currentTime;
+    private float currentTime = 0;
 
     public override void Attack()
     {
@@ -15,8 +15,7 @@ public class AIFighterShooting : AIFighter
 
         if (currentTime <= 0)
         {
-            animator.ToggleWalkAnimation(false);
-            animator.ToggleAttackAnimation(true);
+            animator.PlayAttackAnimation();
             currentTime = maxTimeToSpawn;
 
         }
@@ -28,6 +27,7 @@ public class AIFighterShooting : AIFighter
     }
     public void SpawnProjectile()
     {
+        if (!animator.IsServer) return;
         var projectileInstance = NetworkObjectPool.Singleton.
                                      GetNetworkObject(projectile.gameObject,
                                          shootPos.position, shootPos.rotation);

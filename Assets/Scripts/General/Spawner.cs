@@ -13,7 +13,7 @@ public class Spawner : NetworkBehaviour
     private float currentTime;
     private void Start()
     {
-        currentTime = maxTimeToSpawn;
+        currentTime = 2;
     }
     private void Update()
     {
