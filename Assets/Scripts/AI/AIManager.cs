@@ -9,6 +9,7 @@ public class AIManager : NetworkBehaviour
     [SerializeField] private List<Spawner> spawners;
     private List<AIController> aIControllers;
     private List<PlayerController> players;
+
     public override void OnNetworkSpawn()
     {
         if (!IsServer) { return; }

@@ -15,7 +15,6 @@ public class CustomNetworkManager : NetworkManager
         if (player.IsOwner)
         {
             OwnerPlayer = player;
-            Debug.Log(OwnerPlayer);
         }
         players.Add(player);
         PlayerAdded?.Invoke();

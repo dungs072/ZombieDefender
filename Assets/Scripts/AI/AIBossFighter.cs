@@ -1,20 +1,29 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class AIFighterShooting : AIFighter
+public class AIBossFighter : AIFighter
 {
     [SerializeField] private Projectile projectile;
     [SerializeField] private Transform shootPos;
     [SerializeField] private float maxTimeToSpawn = 10f;
     [SerializeField] private float meleeDistance = 3;
+
+    private AIBossAnimator bossAnimator;
     private float currentTime = 0;
+    private void Start()
+    {
+        bossAnimator = animator as AIBossAnimator;
+    }
 
     public override void Attack(Transform target)
     {
-        animator.ToggleWalkAnimation(false);
+        bossAnimator.ToggleWalkAnimation(false);
         if (IsInDistance(target.position, meleeDistance))
         {
 
-            animator.ToggleAttackAnimation(true);
+            bossAnimator.ToggleAttackAnimation(true);
 
         }
         else
@@ -23,8 +32,8 @@ public class AIFighterShooting : AIFighter
 
             if (currentTime <= 0)
             {
-                animator.ToggleAttackAnimation(false);
-                animator.PlayShootAnimation();
+                bossAnimator.ToggleAttackAnimation(false);
+                PlayRandomShootAnimation();
                 currentTime = maxTimeToSpawn;
 
             }
@@ -33,7 +42,7 @@ public class AIFighterShooting : AIFighter
     }
     public void SpawnProjectile()
     {
-        if (!animator.IsServer) return;
+        if (!bossAnimator.IsServer) return;
         var projectileInstance = NetworkObjectPool.Singleton.
                                      GetNetworkObject(projectile.gameObject,
                                          shootPos.position, shootPos.rotation);
@@ -50,6 +59,24 @@ public class AIFighterShooting : AIFighter
             projectileInstance.Spawn(true);
         }
 
+    }
+
+    public void PlayRandomShootAnimation()
+    {
+        float randomValue = UnityEngine.Random.Range(0, 1f);
+        Debug.Log(randomValue);
+        if (randomValue < 0.3)
+        {
+            bossAnimator.PlayShootAnimation();
+        }
+        else if (randomValue > 0.7)
+        {
+            bossAnimator.PlayFlameAttackAnimation();
+        }
+        else
+        {
+            bossAnimator.PlayShootToAnimation();
+        }
     }
     private bool IsInDistance(Vector3 targetPos, float distance)
     {

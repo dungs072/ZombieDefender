@@ -73,11 +73,9 @@ public class AIController : NetworkBehaviour
 
     public void AttackTarget()
     {
-        animator.ToggleWalkAnimation(false);
-        animator.ToggleAttackAnimation(true);
         movement.ToggleStop(true);
         movement.RotateToTarget(target.position);
-        fighter.Attack();
+        fighter.Attack(target);
     }
 
     public void Die()

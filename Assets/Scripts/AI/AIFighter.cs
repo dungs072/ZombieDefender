@@ -8,7 +8,7 @@ public class AIFighter : MonoBehaviour
     [field: SerializeField] public int Damage { get; private set; } = 5;
     [SerializeField] protected AIAnimator animator;
 
-    public virtual void Attack()
+    public virtual void Attack(Transform target)
     {
 
     }

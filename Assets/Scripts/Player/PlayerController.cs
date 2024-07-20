@@ -11,25 +11,23 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private Fighter fighter;
     [SerializeField] private PlayerAnimator animator;
     [SerializeField] private WeaponManager weaponManager;
-
-    private void Start()
-    {
-        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
-    }
-    public override void OnDestroy()
-    {
-        ((CustomNetworkManager)NetworkManager.Singleton).RemovePlayer(this);
-        base.OnDestroy();
-
-    }
     public override void OnNetworkSpawn()
     {
+
         if (!IsOwner) return;
+        Invoke(nameof(WaitToSetUp), 2f);
+    }
+    private void WaitToSetUp()
+    {
+        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
         PlayerSpawned?.Invoke(this);
+        GetComponent<Health>().Reset();
     }
     public override void OnNetworkDespawn()
     {
+        ((CustomNetworkManager)NetworkManager.Singleton).RemovePlayer(this);
         if (!IsOwner) return;
+
         PlayerDespawned?.Invoke(this);
     }
     private void Update()
