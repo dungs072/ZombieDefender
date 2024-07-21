@@ -10,6 +10,7 @@ public class AIFighter : MonoBehaviour
 
     public virtual void Attack(Transform target)
     {
+        animator.ToggleAttackAnimation(true);
 
     }
 

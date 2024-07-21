@@ -6,7 +6,7 @@ public class CameraController : NetworkBehaviour
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
     public override void OnNetworkSpawn()
     {
-        Invoke(nameof(InitialCameraSetUp), 3f);
+        Invoke(nameof(InitialCameraSetUp), 1f);
     }
     private void InitialCameraSetUp()
     {

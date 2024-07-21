@@ -75,6 +75,7 @@ public class AIController : NetworkBehaviour
     {
         movement.ToggleStop(true);
         movement.RotateToTarget(target.position);
+        animator.ToggleWalkAnimation(false);
         fighter.Attack(target);
     }
 

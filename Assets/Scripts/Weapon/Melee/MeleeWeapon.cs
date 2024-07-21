@@ -3,6 +3,10 @@ public class MeleeWeapon : Weapon
 {
     [SerializeField] private Effect bloodHitEffect;
 
+    public override void UpdateDetailsUI()
+    {
+        ChangeDetailWeapon(0, 0);
+    }
     protected override void Attack()
     {
         base.Attack();

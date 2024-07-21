@@ -4,42 +4,26 @@ using UnityEngine.UI;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    private CustomNetworkManager m_NetworkManager;
+    // private CustomNetworkManager m_NetworkManager;
 
-    void Awake()
-    {
-        m_NetworkManager = GetComponent<CustomNetworkManager>();
-    }
+    // private void Awake()
+    // {
+    //     m_NetworkManager = GetComponent<CustomNetworkManager>();
+    // }
 
-    void OnGUI()
+    public void LeaveMatch()
     {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 300));
-        if (!m_NetworkManager.IsClient && !m_NetworkManager.IsServer)
+        if (NetworkManager.Singleton != null)
         {
-            StartButtons();
+            if (NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
+            else if (NetworkManager.Singleton.IsClient)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
         }
-        else
-        {
-            StatusLabels();
-
-        }
-
-        GUILayout.EndArea();
-    }
-    static void StartButtons()
-    {
-        if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
-        if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
-        if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
-    }
-
-    static void StatusLabels()
-    {
-        var mode = NetworkManager.Singleton.IsHost ?
-            "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
-
-        GUILayout.Label("Transport: " +
-            NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);
-        GUILayout.Label("Mode: " + mode);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 }

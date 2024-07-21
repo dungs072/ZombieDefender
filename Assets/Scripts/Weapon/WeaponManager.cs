@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class WeaponManager : MonoBehaviour
 {
+    public static event Action<Sprite> WeaponChanged;
     [SerializeField] private PlayerAnimator playerAnimator;
     [SerializeField] private List<Weapon> weapons;
     public Weapon CurrentWeapon { get; private set; }
@@ -36,6 +38,17 @@ public class WeaponManager : MonoBehaviour
         CurrentWeapon = weapon;
         CurrentWeapon.AttackingWeapon += playerAnimator.PlayAttackAnimation;
         playerAnimator.SetAnimatorOverride(CurrentWeapon.GetAnimatorOverrideId(), CurrentWeapon.GetAnimatorOverrideController());
+        WeaponChanged?.Invoke(CurrentWeapon.GetWeaponIcon());
+        weapon.UpdateDetailsUI();
+    }
+
+    public void ReloadWeapon()
+    {
+        if (CurrentWeapon is ShootWeapon)
+        {
+            var shootWeapon = CurrentWeapon as ShootWeapon;
+            shootWeapon.ReloadBullet();
+        }
     }
 
 }

@@ -1,10 +1,34 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneController : NetworkBehaviour
 {
+    [SerializeField] private LoadingUI loadingUI;
     private readonly string jungleSceneName = "JungleScene";
+
+    public static SceneController Instance { get; private set; }
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    public override void OnNetworkSpawn()
+    {
+        NetworkManager.Singleton.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
+    }
+    public override void OnNetworkDespawn()
+    {
+        //NetworkManager.Singleton.SceneManager.OnSceneEvent -= SceneManager_OnSceneEvent;
+    }
     public void StartMyServer(bool isHost)
     {
         var success = false;
@@ -20,7 +44,7 @@ public class SceneController : NetworkBehaviour
 
         if (success)
         {
-            NetworkManager.Singleton.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
+
             NetworkManager.Singleton.SceneManager.LoadScene(jungleSceneName, LoadSceneMode.Single);
         }
 
@@ -51,10 +75,11 @@ public class SceneController : NetworkBehaviour
                     // This event provides you with the associated AsyncOperation
                     // AsyncOperation.progress can be used to determine scene loading progression
                     var asyncOperation = sceneEvent.AsyncOperation;
+                    StartCoroutine(UpdateLoadingProgress(asyncOperation));
                     // Since the server "initiates" the event we can simply just check if we are the server here
                     if (IsServer)
                     {
-                        // Handle server side load event related tasks here
+
                     }
                     else
                     {
@@ -77,6 +102,8 @@ public class SceneController : NetworkBehaviour
                     {
                         if (sceneEvent.ClientId == NetworkManager.LocalClientId)
                         {
+
+                            //loadingUI.gameObject.SetActive(false);
                             // Handle server side LoadComplete related tasks here
                         }
                         else
@@ -133,6 +160,7 @@ public class SceneController : NetworkBehaviour
                         // Example of parsing through the clients that completed list
                         if (IsServer)
                         {
+                            loadingUI.gameObject.SetActive(false);
                             // Handle any server-side tasks here
                         }
                         else
@@ -142,6 +170,32 @@ public class SceneController : NetworkBehaviour
                     }
                     break;
                 }
+        }
+    }
+    private IEnumerator UpdateLoadingProgress(AsyncOperation asyncOperation)
+    {
+        loadingUI.gameObject.SetActive(true);
+        asyncOperation.allowSceneActivation = false;
+
+        while (!asyncOperation.isDone)
+        {
+            float progress = Mathf.Clamp01(asyncOperation.progress / 0.9f);
+
+            loadingUI.SetLoadingProgress(progress);
+            if (asyncOperation.progress >= 0.9f)
+            {
+                loadingUI.SetLoadingText("Press any key to continue");
+                //loadingUI.BlynkLoadingText();
+                if (Input.anyKey)
+                {
+                    asyncOperation.allowSceneActivation = true;
+                }
+
+
+
+            }
+
+            yield return null;
         }
     }
 }

@@ -64,7 +64,6 @@ public class AIBossFighter : AIFighter
     public void PlayRandomShootAnimation()
     {
         float randomValue = UnityEngine.Random.Range(0, 1f);
-        Debug.Log(randomValue);
         if (randomValue < 0.3)
         {
             bossAnimator.PlayShootAnimation();

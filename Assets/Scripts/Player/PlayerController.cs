@@ -15,7 +15,9 @@ public class PlayerController : NetworkBehaviour
     {
 
         if (!IsOwner) return;
-        Invoke(nameof(WaitToSetUp), 2f);
+
+        inputHandler.WeaponReloaded += HandleReloadWeapon;
+        Invoke(nameof(WaitToSetUp), 3f);
     }
     private void WaitToSetUp()
     {
@@ -65,6 +67,10 @@ public class PlayerController : NetworkBehaviour
         {
             weaponManager.ChangeDownWeapon();
         }
+    }
+    private void HandleReloadWeapon()
+    {
+        weaponManager.ReloadWeapon();
     }
     private void Fight()
     {

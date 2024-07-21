@@ -15,6 +15,7 @@ public class HandColliderManager : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerController player))
         {
+            Debug.Log(player);
             player.GetComponent<Health>().TakeDamage(fighter.Damage);
             if (player.IsServer)
             {

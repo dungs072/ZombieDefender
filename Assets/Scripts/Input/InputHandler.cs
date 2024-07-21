@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,6 +9,7 @@ public class InputHandler : NetworkBehaviour
     public Vector2 MousePosition { get { return Mouse.current.position.ReadValue(); } }
     public float MouseScrollY { get; private set; }
     public bool CanAttack { get; private set; }
+    public event Action WeaponReloaded;
     private void Awake()
     {
         actions = new Actions();
@@ -20,6 +22,7 @@ public class InputHandler : NetworkBehaviour
 
         actions.Player.Attack.performed += OnAttack;
         actions.Player.Attack.canceled += OnAttack;
+        actions.Player.Reload.performed += OnReload;
         actions.Player.MouseScrollY.performed += (x) => MouseScrollY = x.ReadValue<float>();
     }
     public override void OnNetworkDespawn()
@@ -38,5 +41,11 @@ public class InputHandler : NetworkBehaviour
     {
         CanAttack = context.performed;
     }
-
+    public void OnReload(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            WeaponReloaded?.Invoke();
+        }
+    }
 }
