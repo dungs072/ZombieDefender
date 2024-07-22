@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,6 +7,9 @@ public class Health : NetworkBehaviour
     public event Action<int, int> HealthChanged;
     public event Action CharacterDied;
     [SerializeField] private int maxHealth = 100;
+    [SerializeField] private DamageUI damageUIPrefab;
+
+    private DamageUI damageUIInstance;
     private int currentHealth = 0;
 
     public bool IsDead { get; private set; } = false;
@@ -26,6 +27,7 @@ public class Health : NetworkBehaviour
         if (currentHealth == 0) { return; }
         currentHealth = Mathf.Max(currentHealth - damage, 0);
         HealthChanged?.Invoke(currentHealth, maxHealth);
+        CreateDamageUI(damage);
         if (currentHealth <= 0)
         {
             CharacterDied?.Invoke();
@@ -37,6 +39,24 @@ public class Health : NetworkBehaviour
         currentHealth = maxHealth;
         IsDead = false;
         HealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    public void CreateDamageUI(int damage)
+    {
+        var damageUIInstance = Instantiate(damageUIPrefab, transform.position, Quaternion.identity); ;
+        damageUIInstance.SetDamageText("-" + damage.ToString());
+        LeanTween.move(damageUIInstance.gameObject, transform.position + Vector3.up * 2f, Time.deltaTime * 10f);
+
+        LeanTween.alphaCanvas(damageUIInstance.GetCanvasGroup(), 0, Time.deltaTime * 20).setOnComplete(() =>
+        {
+            OnFadeComplete();
+        });
+    }
+
+    private void OnFadeComplete()
+    {
+        Destroy(damageUIInstance);
+        damageUIInstance = null;
     }
 
 

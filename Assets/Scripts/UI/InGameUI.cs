@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Unity.Netcode;
 public class InGameUI : MonoBehaviour
 {
     [Header("Weapon")]
@@ -21,28 +22,46 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private RectTransform reloadingBar;
     [SerializeField] private RectTransform reloadingFont;
     [SerializeField] private TMP_Text reloadingText;
+    [Header("Energy")]
+    [SerializeField] private RectTransform fontEnergyBar;
+    [SerializeField] private TMP_Text energyStats;
+    [Header("Pick up")]
+    [SerializeField] private GameObject pickupImage;
+    [Header("Money")]
+    [SerializeField] private TMP_Text moneyText;
 
-
-    private void Start()
+    private void Awake()
     {
         PlayerController.PlayerSpawned += HandlePlayerSpawned;
         PlayerController.PlayerDespawned += HandlePlayerDespawned;
+        PickupHandler.ItemPicked += TogglePickupImage;
+        PickupHandler.HoldingPickup += SetReloadingBar;
+        MoneyManager.MoneyChanged += SetMoneyText;
+        Achievement.KillsChanged += SetScore;
 
         WeaponManager.WeaponChanged += SetWeaponIcon;
         Weapon.DetailChanged += SetWeaponDetail;
 
         ShootWeapon.ReloadingTimeChanged += SetReloadingBar;
-        // ShootWeapon.ReloadingTimeStartChanged += BlinkReloadingText;
     }
+
     private void OnDestroy()
     {
         PlayerController.PlayerSpawned -= HandlePlayerSpawned;
         PlayerController.PlayerDespawned -= HandlePlayerDespawned;
+        PickupHandler.ItemPicked -= TogglePickupImage;
+        PickupHandler.HoldingPickup -= SetReloadingBar;
+        MoneyManager.MoneyChanged -= SetMoneyText;
+        Achievement.KillsChanged -= SetScore;
 
         WeaponManager.WeaponChanged -= SetWeaponIcon;
         Weapon.DetailChanged -= SetWeaponDetail;
         ShootWeapon.ReloadingTimeChanged -= SetReloadingBar;
         // ShootWeapon.ReloadingTimeStartChanged -= BlinkReloadingText;
+    }
+    private void TogglePickupImage(bool state)
+    {
+        pickupImage.SetActive(state);
     }
 
     private void SetWeaponIcon(Sprite icon)
@@ -57,10 +76,12 @@ public class InGameUI : MonoBehaviour
     private void HandlePlayerSpawned(PlayerController player)
     {
         player.GetComponent<Health>().HealthChanged += UpdateHealthBar;
+        player.GetComponent<Energy>().EnergyChanged += UpdateEnergyBar;
     }
     private void HandlePlayerDespawned(PlayerController player)
     {
         player.GetComponent<Health>().HealthChanged -= UpdateHealthBar;
+        player.GetComponent<Energy>().EnergyChanged -= UpdateEnergyBar;
     }
     public void UpdateHealthBar(int currentHealth, int maxHealth)
     {
@@ -72,9 +93,23 @@ public class InGameUI : MonoBehaviour
     {
         healthBarStats.text = text;
     }
+    public void UpdateEnergyBar(int currentEnergy, int maxEnergy)
+    {
+        SetEnergyBarStats(currentEnergy.ToString() + "/" + maxEnergy.ToString());
+        float factor = (float)currentEnergy / (float)maxEnergy;
+        fontEnergyBar.localScale = new Vector3(factor, 1, 1);
+    }
+    public void SetEnergyBarStats(string text)
+    {
+        energyStats.text = text;
+    }
     public void SetScore(string text)
     {
-        score.text = text;
+        score.text = "Kills: " + text;
+    }
+    public void SetMoneyText(string text)
+    {
+        moneyText.text = text;
     }
     public void ToggleHoldingMenu(bool state)
     {

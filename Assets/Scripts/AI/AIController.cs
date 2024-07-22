@@ -1,10 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AIController : NetworkBehaviour
 {
+    public static event Action<AIController> AIDead;
     [SerializeField] private HandColliderManager handColliderManager;
     [SerializeField] private Health health;
     [SerializeField] private AIFighter fighter;
@@ -81,6 +84,7 @@ public class AIController : NetworkBehaviour
 
     public void Die()
     {
+        AIDead?.Invoke(this);
         animator.PlayDeathAnimation();
         movement.ToggleStop(true);
         handColliderManager.ToggleHandColliders(false);

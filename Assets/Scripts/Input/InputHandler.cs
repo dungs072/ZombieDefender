@@ -4,12 +4,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class InputHandler : NetworkBehaviour
 {
+    public event Action WeaponReloaded;
+    public event Action LeftDashed;
+    public event Action RightDashed;
     private Actions actions;
     public Vector2 MovementInput { get; private set; }
     public Vector2 MousePosition { get { return Mouse.current.position.ReadValue(); } }
     public float MouseScrollY { get; private set; }
     public bool CanAttack { get; private set; }
-    public event Action WeaponReloaded;
+    public bool CanRun { get; private set; }
+    public bool IsPickupHolding { get; private set; }
+
+
     private void Awake()
     {
         actions = new Actions();
@@ -22,7 +28,13 @@ public class InputHandler : NetworkBehaviour
 
         actions.Player.Attack.performed += OnAttack;
         actions.Player.Attack.canceled += OnAttack;
+        actions.Player.Run.performed += OnRun;
+        actions.Player.Run.canceled += OnRun;
+        actions.Player.Pickup.performed += OnPickup;
+        actions.Player.Pickup.canceled += OnPickup;
         actions.Player.Reload.performed += OnReload;
+        actions.Player.DashLeft.performed += OnDashLeft;
+        actions.Player.DashRight.performed += OnDashRight;
         actions.Player.MouseScrollY.performed += (x) => MouseScrollY = x.ReadValue<float>();
     }
     public override void OnNetworkDespawn()
@@ -41,6 +53,10 @@ public class InputHandler : NetworkBehaviour
     {
         CanAttack = context.performed;
     }
+    public void OnRun(InputAction.CallbackContext context)
+    {
+        CanRun = context.performed;
+    }
     public void OnReload(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -48,4 +64,23 @@ public class InputHandler : NetworkBehaviour
             WeaponReloaded?.Invoke();
         }
     }
+    public void OnPickup(InputAction.CallbackContext context)
+    {
+        IsPickupHolding = context.performed;
+    }
+    public void OnDashLeft(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            LeftDashed?.Invoke();
+        }
+    }
+    public void OnDashRight(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            RightDashed?.Invoke();
+        }
+    }
+
 }

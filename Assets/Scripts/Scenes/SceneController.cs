@@ -176,22 +176,19 @@ public class SceneController : NetworkBehaviour
     {
         loadingUI.gameObject.SetActive(true);
         asyncOperation.allowSceneActivation = false;
-
         while (!asyncOperation.isDone)
         {
             float progress = Mathf.Clamp01(asyncOperation.progress / 0.9f);
+
 
             loadingUI.SetLoadingProgress(progress);
             if (asyncOperation.progress >= 0.9f)
             {
                 loadingUI.SetLoadingText("Press any key to continue");
-                //loadingUI.BlynkLoadingText();
                 if (Input.anyKey)
                 {
                     asyncOperation.allowSceneActivation = true;
                 }
-
-
 
             }
 

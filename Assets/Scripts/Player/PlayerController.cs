@@ -5,23 +5,31 @@ public class PlayerController : NetworkBehaviour
 {
     public static event Action<PlayerController> PlayerSpawned;
     public static event Action<PlayerController> PlayerDespawned;
+    [SerializeField] private int runEnergyAmount = 1;
     [SerializeField] private float rotationSpeed = 10;
     [SerializeField] private InputHandler inputHandler;
     [SerializeField] private Movement movement;
     [SerializeField] private Fighter fighter;
     [SerializeField] private PlayerAnimator animator;
     [SerializeField] private WeaponManager weaponManager;
+    [SerializeField] private PickupHandler pickupHandler;
+    private Energy energy;
     public override void OnNetworkSpawn()
     {
-
         if (!IsOwner) return;
-
+        energy = GetComponent<Energy>();
         inputHandler.WeaponReloaded += HandleReloadWeapon;
-        Invoke(nameof(WaitToSetUp), 3f);
+        HandleInputRegister();
+        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
+        Invoke(nameof(WaitToSetUp), Const.ReloadingTimeAdded);
+    }
+    private void HandleInputRegister()
+    {
+        inputHandler.RightDashed += HandleDashLeft;
+        inputHandler.LeftDashed += HandleDashRight;
     }
     private void WaitToSetUp()
     {
-        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
         PlayerSpawned?.Invoke(this);
         GetComponent<Health>().Reset();
     }
@@ -38,6 +46,7 @@ public class PlayerController : NetworkBehaviour
         HandleRotation();
         HandleMovement();
         HandleSwitchWeapon();
+        HandlePickup();
         Fight();
     }
     private void HandleRotation()
@@ -52,7 +61,12 @@ public class PlayerController : NetworkBehaviour
     {
         if (inputHandler.MovementInput != Vector2.zero)
         {
-            movement.Move(inputHandler.MovementInput);
+            bool canRun = inputHandler.CanRun;
+            if (canRun)
+            {
+                canRun = energy.UseEnergy(runEnergyAmount);
+            }
+            movement.Move(inputHandler.MovementInput, canRun);
         }
         animator.PlayLocomtionAnimation(inputHandler.MovementInput != Vector2.zero);
     }
@@ -71,6 +85,18 @@ public class PlayerController : NetworkBehaviour
     private void HandleReloadWeapon()
     {
         weaponManager.ReloadWeapon();
+    }
+    private void HandlePickup()
+    {
+        pickupHandler.HandleHoldingPickup(inputHandler.IsPickupHolding);
+    }
+    private void HandleDashLeft()
+    {
+        //rb.AddForce(transform.right * dashForce, ForceMode2D.Impulse);
+    }
+    private void HandleDashRight()
+    {
+        //rb.AddForce(transform.right * -1 * dashForce, ForceMode2D.Impulse);
     }
     private void Fight()
     {
