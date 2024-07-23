@@ -31,6 +31,7 @@ public class PickupHandler : NetworkBehaviour
     public void HandleHoldingPickup(bool state)
     {
         if (items.Count == 0) return;
+        //if(items[items.Count-1].IsOccupied)
         if (state)
         {
             currentTime += Time.deltaTime;
@@ -39,7 +40,7 @@ public class PickupHandler : NetworkBehaviour
                 currentTime = 0;
                 Item item = items[items.Count - 1];
                 items.RemoveAt(items.Count - 1);
-                item.PickUpItem();
+                item.PickUpItem(GetComponent<PlayerController>());
                 ItemPicked?.Invoke(items.Count > 0);
                 // process multiple pick up here
 
@@ -59,6 +60,8 @@ public class PickupHandler : NetworkBehaviour
         }
 
     }
+
+
 
 
 }

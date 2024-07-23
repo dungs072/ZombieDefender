@@ -47,6 +47,11 @@ public class Energy : MonoBehaviour
         }
 
     }
+    public void AddMaxEnergy(int amount)
+    {
+        maxEnergy += amount;
+        EnergyChanged?.Invoke(currentEnergy, maxEnergy);
+    }
 
 
 }

@@ -246,6 +246,17 @@ public partial class @Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""723bd16a-ca2d-4c8a-a39e-94674678eb18"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Mouse&KeyBoard"",
+                    ""action"": ""Reload"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""0e03265b-b93c-4d80-9240-109c68a4fa56"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",

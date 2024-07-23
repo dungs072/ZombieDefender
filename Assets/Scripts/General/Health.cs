@@ -58,6 +58,15 @@ public class Health : NetworkBehaviour
         Destroy(damageUIInstance);
         damageUIInstance = null;
     }
-
+    public void AddMaxHealth(int amount)
+    {
+        maxHealth += amount;
+        HealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+    public void AddCurrentHealth(int amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        HealthChanged?.Invoke(currentHealth, maxHealth);
+    }
 
 }

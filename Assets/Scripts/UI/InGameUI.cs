@@ -30,10 +30,13 @@ public class InGameUI : MonoBehaviour
     [Header("Money")]
     [SerializeField] private TMP_Text moneyText;
 
-    private void Awake()
+    private void Start()
     {
-        PlayerController.PlayerSpawned += HandlePlayerSpawned;
-        PlayerController.PlayerDespawned += HandlePlayerDespawned;
+        // PlayerController.PlayerSpawned += HandlePlayerSpawned;
+        // PlayerController.PlayerDespawned += HandlePlayerDespawned;
+        var ownedPlayer = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
+        HandlePlayerSpawned(ownedPlayer);
+
         PickupHandler.ItemPicked += TogglePickupImage;
         PickupHandler.HoldingPickup += SetReloadingBar;
         MoneyManager.MoneyChanged += SetMoneyText;
@@ -47,8 +50,8 @@ public class InGameUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        PlayerController.PlayerSpawned -= HandlePlayerSpawned;
-        PlayerController.PlayerDespawned -= HandlePlayerDespawned;
+        // PlayerController.PlayerSpawned -= HandlePlayerSpawned;
+        // PlayerController.PlayerDespawned -= HandlePlayerDespawned;
         PickupHandler.ItemPicked -= TogglePickupImage;
         PickupHandler.HoldingPickup -= SetReloadingBar;
         MoneyManager.MoneyChanged -= SetMoneyText;
@@ -75,8 +78,14 @@ public class InGameUI : MonoBehaviour
 
     private void HandlePlayerSpawned(PlayerController player)
     {
-        player.GetComponent<Health>().HealthChanged += UpdateHealthBar;
-        player.GetComponent<Energy>().EnergyChanged += UpdateEnergyBar;
+        var health = player.GetComponent<Health>();
+        var energy = player.GetComponent<Energy>();
+        health.HealthChanged += UpdateHealthBar;
+        energy.EnergyChanged += UpdateEnergyBar;
+
+        health.TakeDamage(0);
+        energy.UseEnergy(0);
+
     }
     private void HandlePlayerDespawned(PlayerController player)
     {

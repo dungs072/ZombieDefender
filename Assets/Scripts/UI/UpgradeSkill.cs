@@ -4,7 +4,13 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-
+public enum UpgradeSkillType
+{
+    Health,
+    Energy,
+    RunSpeed,
+    ReloadingSpeed
+}
 public class UpgradeSkill : MonoBehaviour
 {
     [SerializeField] private int price = 100;
@@ -12,6 +18,7 @@ public class UpgradeSkill : MonoBehaviour
     [SerializeField] private List<Image> unselectedImages;
     [SerializeField] private Button upgradeButton;
     [SerializeField] private TMP_Text priceText;
+    [SerializeField] private UpgradeSkillType skillType;
     private int currentIndex = 0;
     private void Start()
     {
@@ -26,7 +33,7 @@ public class UpgradeSkill : MonoBehaviour
             moneyManager.MinusMoney(price);
             unselectedImages[currentIndex].sprite = selectedSprite;
             currentIndex++;
-
+            player.HandleUpgradeSkill(skillType);
 
             if (currentIndex == unselectedImages.Count)
             {

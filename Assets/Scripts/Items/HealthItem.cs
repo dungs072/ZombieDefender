@@ -2,17 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HealthItem : MonoBehaviour
+public class HealthItem : Item
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private int healthAmount = 50;
+    public override void PickUpItem(PlayerController player)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        player.GetComponent<Health>().AddCurrentHealth(healthAmount);
+        base.PickUpItem(player);
     }
 }

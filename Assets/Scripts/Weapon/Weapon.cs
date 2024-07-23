@@ -1,11 +1,17 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+public enum WeaponName
+{
+    Knife,
+    Pistol,
+    Riffle
+}
 public class Weapon : NetworkBehaviour, IProduct
 {
-
     public static event Action<int, int> DetailChanged;
     public event Action AttackingWeapon;
+    [SerializeField] private WeaponName weaponName;
     [SerializeField] protected int damage;
     [SerializeField] protected float attackRate;
     [SerializeField] private int animatorOverrideId;
@@ -36,6 +42,10 @@ public class Weapon : NetworkBehaviour, IProduct
     public Sprite GetWeaponIcon()
     {
         return weaponIcon;
+    }
+    public WeaponName GetWeaponName()
+    {
+        return weaponName;
     }
 
     protected void ChangeDetailWeapon(int detail1, int detail2)

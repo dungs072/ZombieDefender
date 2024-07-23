@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
-    public static event Action<PlayerController> PlayerSpawned;
+    //public static event Action<PlayerController> PlayerSpawned;
     public static event Action<PlayerController> PlayerDespawned;
     [SerializeField] private int runEnergyAmount = 1;
     [SerializeField] private float rotationSpeed = 10;
@@ -30,7 +30,7 @@ public class PlayerController : NetworkBehaviour
     }
     private void WaitToSetUp()
     {
-        PlayerSpawned?.Invoke(this);
+        //PlayerSpawned?.Invoke(this);
         GetComponent<Health>().Reset();
     }
     public override void OnNetworkDespawn()
@@ -103,6 +103,26 @@ public class PlayerController : NetworkBehaviour
         if (inputHandler.CanAttack)
         {
             fighter.Attack();
+        }
+    }
+
+    public void HandleUpgradeSkill(UpgradeSkillType skillType)
+    {
+        if (skillType == UpgradeSkillType.Health)
+        {
+            GetComponent<Health>().AddMaxHealth(25);
+        }
+        else if (skillType == UpgradeSkillType.Energy)
+        {
+            energy.AddMaxEnergy(50);
+        }
+        else if (skillType == UpgradeSkillType.RunSpeed)
+        {
+            movement.AddRunningSpeed(1);
+        }
+        else if (skillType == UpgradeSkillType.ReloadingSpeed)
+        {
+            weaponManager.AddReduceReloadingTime(0.1f);
         }
     }
 

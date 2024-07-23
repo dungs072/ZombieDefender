@@ -141,6 +141,16 @@ public class ShootWeapon : Weapon
         SpawnProjectile();
     }
 
+    public void ReduceReloadingTime(float time)
+    {
+        reloadingTime = Mathf.Max(reloadingTime - time, 0);
+    }
+
+    public void SetShootPos(Transform shootPos)
+    {
+        this.shootPos = shootPos;
+    }
+
 
 
 }
