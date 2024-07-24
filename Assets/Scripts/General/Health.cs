@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Health : NetworkBehaviour
 {
+    public event Action TakingDamage;
     public event Action<int, int> HealthChanged;
     public event Action CharacterDied;
     [SerializeField] private int maxHealth = 100;
@@ -27,11 +28,16 @@ public class Health : NetworkBehaviour
         if (currentHealth == 0) { return; }
         currentHealth = Mathf.Max(currentHealth - damage, 0);
         HealthChanged?.Invoke(currentHealth, maxHealth);
+
         CreateDamageUI(damage);
         if (currentHealth <= 0)
         {
             CharacterDied?.Invoke();
             IsDead = true;
+        }
+        if (damage > 0)
+        {
+            TakingDamage?.Invoke();
         }
     }
     public void Reset()
@@ -55,7 +61,7 @@ public class Health : NetworkBehaviour
 
     private void OnFadeComplete()
     {
-        Destroy(damageUIInstance);
+        Destroy(damageUIInstance, 1f);
         damageUIInstance = null;
     }
     public void AddMaxHealth(int amount)

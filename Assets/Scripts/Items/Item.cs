@@ -5,6 +5,7 @@ using Unity.Netcode;
 using System;
 public class Item : NetworkBehaviour
 {
+    [field: SerializeField] public string NameItem { get; private set; }
     private PlayerController pickablePlayer;
     public bool IsOccupied { get { return isOccupied.Value; } }
     private NetworkVariable<bool> isOccupied = new NetworkVariable<bool>(default,

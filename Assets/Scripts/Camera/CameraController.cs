@@ -4,6 +4,11 @@ using Cinemachine;
 using System;
 public class CameraController : NetworkBehaviour
 {
+    public static CameraController Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
     public override void OnNetworkSpawn()
     {
@@ -12,7 +17,6 @@ public class CameraController : NetworkBehaviour
     private void InitialCameraSetUp()
     {
         var player = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
-        Debug.Log(player);
         virtualCamera.Follow = player.transform;
         virtualCamera.LookAt = player.transform;
     }

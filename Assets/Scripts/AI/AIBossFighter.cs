@@ -5,10 +5,17 @@ using UnityEngine;
 
 public class AIBossFighter : AIFighter
 {
-    [SerializeField] private Projectile projectile;
     [SerializeField] private Transform shootPos;
     [SerializeField] private float maxTimeToSpawn = 10f;
     [SerializeField] private float meleeDistance = 3;
+    [Header("Nail Fighter")]
+    [SerializeField] private Projectile leftNailPrefab;
+    [SerializeField] private Projectile rightNailPrefab;
+    [SerializeField] private Transform leftNailShootPos;
+    [SerializeField] private Transform rightNailShootPos;
+    [Header("Arm Fighter")]
+    [SerializeField] private Projectile armPrefab;
+    [SerializeField] private Transform armShootPos;
 
     private AIBossAnimator bossAnimator;
     private float currentTime = 0;
@@ -40,25 +47,34 @@ public class AIBossFighter : AIFighter
         }
 
     }
-    public void SpawnProjectile()
+    public void SpawnProjectile(Projectile projectilePrefab, Transform shootTransform)
     {
         if (!bossAnimator.IsServer) return;
         var projectileInstance = NetworkObjectPool.Singleton.
-                                     GetNetworkObject(projectile.gameObject,
-                                         shootPos.position, shootPos.rotation);
+                                     GetNetworkObject(projectilePrefab.gameObject,
+                                         shootTransform.position, shootTransform.rotation);
         projectileInstance.GetComponent<Projectile>().SetDamage(Damage);
         if (projectileInstance.IsSpawned)
         {
             Projectile projectile = projectileInstance.GetComponent<Projectile>();
             projectile.ToggleGameObjectClientRpc(true);
-            projectile.SetPositionClientRpc(shootPos.position);
-            projectile.SetRotationClientRpc(shootPos.rotation);
+            projectile.SetPositionClientRpc(shootTransform.position);
+            projectile.SetRotationClientRpc(shootTransform.rotation);
         }
         else
         {
             projectileInstance.Spawn(true);
         }
 
+    }
+    public void SpawnNailProjectiles()
+    {
+        SpawnProjectile(leftNailPrefab, leftNailShootPos);
+        SpawnProjectile(rightNailPrefab, rightNailShootPos);
+    }
+    public void SpawnArmProjectile()
+    {
+        SpawnProjectile(armPrefab, armShootPos);
     }
 
     public void PlayRandomShootAnimation()

@@ -27,8 +27,13 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private TMP_Text energyStats;
     [Header("Pick up")]
     [SerializeField] private GameObject pickupImage;
+    [SerializeField] private TMP_Text nameItemText;
     [Header("Money")]
     [SerializeField] private TMP_Text moneyText;
+    [Header("Blood Damage")]
+    [SerializeField] private Image bloodDamageImage;
+    [SerializeField] private float fadeInValue;
+    [SerializeField] private float fadeDuration = 0.4f;
 
     private void Start()
     {
@@ -62,9 +67,14 @@ public class InGameUI : MonoBehaviour
         ShootWeapon.ReloadingTimeChanged -= SetReloadingBar;
         // ShootWeapon.ReloadingTimeStartChanged -= BlinkReloadingText;
     }
-    private void TogglePickupImage(bool state)
+    private void TogglePickupImage(bool state, string nameItem)
     {
         pickupImage.SetActive(state);
+        SetNameItemText(nameItem);
+    }
+    private void SetNameItemText(string text)
+    {
+        nameItemText.text = text;
     }
 
     private void SetWeaponIcon(Sprite icon)
@@ -81,6 +91,7 @@ public class InGameUI : MonoBehaviour
         var health = player.GetComponent<Health>();
         var energy = player.GetComponent<Energy>();
         health.HealthChanged += UpdateHealthBar;
+        health.TakingDamage += FadeBloodImageIn;
         energy.EnergyChanged += UpdateEnergyBar;
 
         health.TakeDamage(0);
@@ -97,6 +108,13 @@ public class InGameUI : MonoBehaviour
         SetHealthBarStats(currentHealth.ToString() + "/" + maxHealth.ToString());
         float factor = (float)currentHealth / (float)maxHealth;
         fontHealthBar.localScale = new Vector3(factor, 1, 1);
+    }
+    private void FadeBloodImageIn()
+    {
+        LeanTween.alpha(bloodDamageImage.rectTransform, fadeInValue, fadeDuration).setOnComplete(() =>
+        {
+            LeanTween.alpha(bloodDamageImage.rectTransform, 0f, fadeDuration);
+        });
     }
     public void SetHealthBarStats(string text)
     {

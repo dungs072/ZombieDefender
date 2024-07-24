@@ -16,7 +16,7 @@ public class ReloadingUI : MonoBehaviour
     }
     public void SetReloadingFill(float factor)
     {
-        loadingFill.gameObject.SetActive(factor > 0.1);
+        loadingFill.gameObject.SetActive(factor > 0.02);
         loadingFill.fillAmount = factor;
     }
 }

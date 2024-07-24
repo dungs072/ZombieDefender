@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -16,6 +17,10 @@ public class ShootWeapon : Weapon
     [SerializeField] private int maxBullet;
     [SerializeField] private int maxBulletsInMag;
 
+    [Header("Guns Type")]
+    [SerializeField] private int numberBulletSpawned = 1;
+    [SerializeField] private float leftRange = 200;
+    [SerializeField] private float rightRange = 150;
     private bool isReloadingFinished = true;
 
 
@@ -40,6 +45,7 @@ public class ShootWeapon : Weapon
             if (HandleBullets())
             {
                 SpawnProjectileServerRpc();
+                TriggerShake();
             }
             else
             {
@@ -47,9 +53,6 @@ public class ShootWeapon : Weapon
             }
 
         }
-
-
-
 
     }
     private bool HandleBullets()
@@ -118,23 +121,48 @@ public class ShootWeapon : Weapon
     }
     private void SpawnProjectile()
     {
-        var projectileInstance = NetworkObjectPool.Singleton.
-                                     GetNetworkObject(projectile.gameObject,
-                                         shootPos.position, shootPos.rotation);
-        projectileInstance.GetComponent<Projectile>().SetDamage(damage);
-        if (projectileInstance.IsSpawned)
+        for (int i = 0; i < numberBulletSpawned; i++)
         {
-            Projectile projectile = projectileInstance.GetComponent<Projectile>();
-            projectile.ToggleGameObjectClientRpc(true);
-            projectile.SetPositionClientRpc(shootPos.position);
-            projectile.SetRotationClientRpc(shootPos.rotation);
-        }
-        else
-        {
-            projectileInstance.Spawn(true);
+            Quaternion randomQuarternion = GetRandomDirection(shootPos.up);
+            if (i == 0)
+            {
+                randomQuarternion = shootPos.rotation;
+            }
+
+            var projectileInstance = NetworkObjectPool.Singleton.
+                                   GetNetworkObject(projectile.gameObject,
+                                       shootPos.position, randomQuarternion);
+            projectileInstance.GetComponent<Projectile>().SetDamage(damage);
+            if (projectileInstance.IsSpawned)
+            {
+                Projectile projectile = projectileInstance.GetComponent<Projectile>();
+                projectile.ToggleGameObjectClientRpc(true);
+                projectile.SetPositionClientRpc(shootPos.position);
+                projectile.SetRotationClientRpc(randomQuarternion);
+            }
+            else
+            {
+                projectileInstance.Spawn(true);
+            }
         }
 
+
     }
+
+    public void TriggerShake()
+    {
+        CameraController.Instance.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+    }
+
+    Quaternion GetRandomDirection(Vector3 direction)
+    {
+        float randomAngle = UnityEngine.Random.Range(leftRange, rightRange);
+        Quaternion rotation = Quaternion.AngleAxis(randomAngle, Vector3.forward);
+        return rotation;
+    }
+
+
+
     [Rpc(SendTo.Server)]
     private void SpawnProjectileServerRpc()
     {
@@ -151,6 +179,11 @@ public class ShootWeapon : Weapon
         this.shootPos = shootPos;
     }
 
+
+    private void OnDrawGizmosSelected()
+    {
+
+    }
 
 
 }
