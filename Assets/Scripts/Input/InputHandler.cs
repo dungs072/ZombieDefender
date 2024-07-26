@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class InputHandler : NetworkBehaviour
 {
     public event Action WeaponReloaded;
+    public event Action ItemThrown;
     public event Action LeftDashed;
     public event Action RightDashed;
     private Actions actions;
@@ -33,8 +34,10 @@ public class InputHandler : NetworkBehaviour
         actions.Player.Pickup.performed += OnPickup;
         actions.Player.Pickup.canceled += OnPickup;
         actions.Player.Reload.performed += OnReload;
+        actions.Player.Throw.performed += OnThrowItem;
         actions.Player.DashLeft.performed += OnDashLeft;
         actions.Player.DashRight.performed += OnDashRight;
+
         actions.Player.MouseScrollY.performed += (x) => MouseScrollY = x.ReadValue<float>();
     }
     public override void OnNetworkDespawn()
@@ -68,6 +71,13 @@ public class InputHandler : NetworkBehaviour
     {
         IsPickupHolding = context.performed;
     }
+    public void OnThrowItem(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            ItemThrown?.Invoke();
+        }
+    }
     public void OnDashLeft(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -82,5 +92,6 @@ public class InputHandler : NetworkBehaviour
             RightDashed?.Invoke();
         }
     }
+
 
 }

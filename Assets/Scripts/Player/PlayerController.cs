@@ -13,6 +13,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private PlayerAnimator animator;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private PickupHandler pickupHandler;
+    [SerializeField] private ThrowHandler throwHandler;
     private Energy energy;
     public override void OnNetworkSpawn()
     {
@@ -27,6 +28,7 @@ public class PlayerController : NetworkBehaviour
     {
         inputHandler.RightDashed += HandleDashLeft;
         inputHandler.LeftDashed += HandleDashRight;
+        inputHandler.ItemThrown += HandleThrow;
     }
     private void WaitToSetUp()
     {
@@ -89,6 +91,10 @@ public class PlayerController : NetworkBehaviour
     private void HandlePickup()
     {
         pickupHandler.HandleHoldingPickup(inputHandler.IsPickupHolding);
+    }
+    private void HandleThrow()
+    {
+        throwHandler.ThrowGrenade();
     }
     private void HandleDashLeft()
     {

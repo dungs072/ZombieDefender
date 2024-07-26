@@ -76,6 +76,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Throw",
+                    "type": "Button",
+                    "id": "cba2eabe-2329-4ea9-aedc-0b1acb99c26b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -307,6 +316,17 @@
                     "processors": "",
                     "groups": "Mouse&KeyBoard",
                     "action": "Pickup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa3f66d2-e020-4c4e-b4d1-b33a0734f5ab",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse&KeyBoard",
+                    "action": "Throw",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

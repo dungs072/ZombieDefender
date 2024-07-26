@@ -49,21 +49,13 @@ public class Health : NetworkBehaviour
 
     public void CreateDamageUI(int damage)
     {
-        var damageUIInstance = Instantiate(damageUIPrefab, transform.position, Quaternion.identity); ;
+        damageUIInstance = Instantiate(damageUIPrefab, transform.position, Quaternion.identity); ;
         damageUIInstance.SetDamageText("-" + damage.ToString());
         LeanTween.move(damageUIInstance.gameObject, transform.position + Vector3.up * 2f, Time.deltaTime * 10f);
-
-        LeanTween.alphaCanvas(damageUIInstance.GetCanvasGroup(), 0, Time.deltaTime * 20).setOnComplete(() =>
-        {
-            OnFadeComplete();
-        });
+        Destroy(damageUIInstance.gameObject, Time.deltaTime * 20);
+        LeanTween.alphaCanvas(damageUIInstance.GetCanvasGroup(), 0, Time.deltaTime * 20);
     }
 
-    private void OnFadeComplete()
-    {
-        Destroy(damageUIInstance, 1f);
-        damageUIInstance = null;
-    }
     public void AddMaxHealth(int amount)
     {
         maxHealth += amount;

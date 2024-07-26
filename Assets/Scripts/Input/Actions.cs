@@ -98,6 +98,15 @@ public partial class @Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Throw"",
+                    ""type"": ""Button"",
+                    ""id"": ""cba2eabe-2329-4ea9-aedc-0b1acb99c26b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -331,6 +340,17 @@ public partial class @Actions: IInputActionCollection2, IDisposable
                     ""action"": ""Pickup"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa3f66d2-e020-4c4e-b4d1-b33a0734f5ab"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Mouse&KeyBoard"",
+                    ""action"": ""Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -364,6 +384,7 @@ public partial class @Actions: IInputActionCollection2, IDisposable
         m_Player_DashRight = m_Player.FindAction("DashRight", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Pickup = m_Player.FindAction("Pickup", throwIfNotFound: true);
+        m_Player_Throw = m_Player.FindAction("Throw", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -433,6 +454,7 @@ public partial class @Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_DashRight;
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Pickup;
+    private readonly InputAction m_Player_Throw;
     public struct PlayerActions
     {
         private @Actions m_Wrapper;
@@ -445,6 +467,7 @@ public partial class @Actions: IInputActionCollection2, IDisposable
         public InputAction @DashRight => m_Wrapper.m_Player_DashRight;
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Pickup => m_Wrapper.m_Player_Pickup;
+        public InputAction @Throw => m_Wrapper.m_Player_Throw;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -478,6 +501,9 @@ public partial class @Actions: IInputActionCollection2, IDisposable
             @Pickup.started += instance.OnPickup;
             @Pickup.performed += instance.OnPickup;
             @Pickup.canceled += instance.OnPickup;
+            @Throw.started += instance.OnThrow;
+            @Throw.performed += instance.OnThrow;
+            @Throw.canceled += instance.OnThrow;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -506,6 +532,9 @@ public partial class @Actions: IInputActionCollection2, IDisposable
             @Pickup.started -= instance.OnPickup;
             @Pickup.performed -= instance.OnPickup;
             @Pickup.canceled -= instance.OnPickup;
+            @Throw.started -= instance.OnThrow;
+            @Throw.performed -= instance.OnThrow;
+            @Throw.canceled -= instance.OnThrow;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -542,5 +571,6 @@ public partial class @Actions: IInputActionCollection2, IDisposable
         void OnDashRight(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnPickup(InputAction.CallbackContext context);
+        void OnThrow(InputAction.CallbackContext context);
     }
 }

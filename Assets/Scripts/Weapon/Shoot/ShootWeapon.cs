@@ -19,8 +19,7 @@ public class ShootWeapon : Weapon
 
     [Header("Guns Type")]
     [SerializeField] private int numberBulletSpawned = 1;
-    [SerializeField] private float leftRange = 200;
-    [SerializeField] private float rightRange = 150;
+    [SerializeField] private float shootAngle = 200;
     private bool isReloadingFinished = true;
 
 
@@ -123,7 +122,7 @@ public class ShootWeapon : Weapon
     {
         for (int i = 0; i < numberBulletSpawned; i++)
         {
-            Quaternion randomQuarternion = GetRandomDirection(shootPos.up);
+            Quaternion randomQuarternion = Quaternion.LookRotation(GetRandomDirection());
             if (i == 0)
             {
                 randomQuarternion = shootPos.rotation;
@@ -154,13 +153,21 @@ public class ShootWeapon : Weapon
         CameraController.Instance.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
     }
 
-    Quaternion GetRandomDirection(Vector3 direction)
+    public Vector2 GetRandomDirection()
     {
-        float randomAngle = UnityEngine.Random.Range(leftRange, rightRange);
-        Quaternion rotation = Quaternion.AngleAxis(randomAngle, Vector3.forward);
-        return rotation;
-    }
+        // // Convert the angle ranges from degrees to radians
+        // float minRad = left * Mathf.Deg2Rad;
+        // float maxRad = rightRange * Mathf.Deg2Rad;
 
+        // // Generate a random angle within the specified range
+        // float randomAngle = UnityEngine.Random.Range(minRad, maxRad);
+
+        // // Calculate the direction vector based on the random angle
+        // Vector2 direction = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
+
+        // return direction.normalized;
+        return Vector2.zero;
+    }
 
 
     [Rpc(SendTo.Server)]
@@ -180,10 +187,15 @@ public class ShootWeapon : Weapon
     }
 
 
-    private void OnDrawGizmosSelected()
-    {
+    // private void OnDrawGizmosSelected()
+    // {
+    //     Gizmos.color = Color.red;
 
-    }
+    //     Vector2 point = new Vector2(Mathf.Tan(shootAngle / 2) * shootPos.up.x, shootPos.up.y);
+    //     Gizmos.DrawRay(shootPos.position, point);
+    //     point = new Vector2(Mathf.Tan(-shootAngle / 2) * shootPos.up.x, shootPos.up.y);
+    //     Gizmos.DrawRay(shootPos.position, point);
+    // }
 
 
 }
