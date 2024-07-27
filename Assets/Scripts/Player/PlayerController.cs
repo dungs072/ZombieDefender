@@ -49,6 +49,7 @@ public class PlayerController : NetworkBehaviour
         HandleMovement();
         HandleSwitchWeapon();
         HandlePickup();
+        HandleAim();
         Fight();
     }
     private void HandleRotation()
@@ -95,6 +96,10 @@ public class PlayerController : NetworkBehaviour
     private void HandleThrow()
     {
         throwHandler.ThrowGrenade();
+    }
+    private void HandleAim()
+    {
+        weaponManager.HandleAim(inputHandler.IsAiming);
     }
     private void HandleDashLeft()
     {

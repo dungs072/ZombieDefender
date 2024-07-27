@@ -22,6 +22,7 @@ public class ShootWeapon : Weapon
     [SerializeField] private int numberBulletSpawned = 1;
     [SerializeField] private float spread = 10;
     [SerializeField] private bool reloadPerBullet = false;
+    //[SerializeField] private bool isTap = false;
     private bool isReloadingFinished = true;
 
     private int bulletLeft = 0;
@@ -45,12 +46,7 @@ public class ShootWeapon : Weapon
         canAttack = false;
         if (IsOwner)
         {
-            if (HandleBullets())
-            {
-
-
-            }
-            else
+            if (!HandleBullets())
             {
                 isPauseAttacking = true;
             }

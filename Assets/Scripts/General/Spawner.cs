@@ -9,6 +9,12 @@ public class Spawner : NetworkBehaviour
     [SerializeField] private List<GameObject> prefabs;
     [SerializeField] private float maxTimeToSpawn = 5f;
     [SerializeField] private float radius = 10f;
+    [SerializeField] private int maxZombies;
+    [SerializeField] private bool spawnOverTime = true;
+
+    private List<GameObject> zombies = new List<GameObject>();
+
+    public int MaxZombies { get { return maxZombies; } }
 
     private float currentTime;
     private void Start()
@@ -17,6 +23,7 @@ public class Spawner : NetworkBehaviour
     }
     private void Update()
     {
+        if (!spawnOverTime) return;
         if (!IsServer) return;
         currentTime -= Time.deltaTime;
         if (currentTime <= 0)
@@ -25,8 +32,9 @@ public class Spawner : NetworkBehaviour
             currentTime = maxTimeToSpawn;
         }
     }
-    private void SpawnObject()
+    public void SpawnObject()
     {
+        if (zombies.Count == maxTimeToSpawn) return;
         Vector3 randomPosition = GetRandomPosition();
         randomPosition.z = 0;
         int randomIndex = UnityEngine.Random.Range(0, prefabs.Count);
@@ -45,12 +53,24 @@ public class Spawner : NetworkBehaviour
         {
             instance.Spawn(true);
         }
+        zombies.Add(instance.gameObject);
     }
     private Vector3 GetRandomPosition()
     {
         var randomDirection = UnityEngine.Random.insideUnitSphere.normalized;
         var randomRadius = UnityEngine.Random.Range(0, radius);
         return transform.position + randomDirection * randomRadius;
+    }
+    public bool IsAllZombieDie()
+    {
+        foreach (var zombie in zombies)
+        {
+            if (zombie.gameObject.activeSelf)
+            {
+                return false;
+            }
+        }
+        return true;
     }
     private void OnDrawGizmos()
     {

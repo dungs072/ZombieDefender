@@ -15,6 +15,7 @@ public class InputHandler : NetworkBehaviour
     public bool CanAttack { get; private set; }
     public bool CanRun { get; private set; }
     public bool IsPickupHolding { get; private set; }
+    public bool IsAiming { get; private set; }
 
 
     private void Awake()
@@ -35,6 +36,8 @@ public class InputHandler : NetworkBehaviour
         actions.Player.Pickup.canceled += OnPickup;
         actions.Player.Reload.performed += OnReload;
         actions.Player.Throw.performed += OnThrowItem;
+        actions.Player.Aim.performed += OnAiming;
+        actions.Player.Aim.canceled += OnAiming;
         actions.Player.DashLeft.performed += OnDashLeft;
         actions.Player.DashRight.performed += OnDashRight;
 
@@ -77,6 +80,10 @@ public class InputHandler : NetworkBehaviour
         {
             ItemThrown?.Invoke();
         }
+    }
+    public void OnAiming(InputAction.CallbackContext context)
+    {
+        IsAiming = context.performed;
     }
     public void OnDashLeft(InputAction.CallbackContext context)
     {

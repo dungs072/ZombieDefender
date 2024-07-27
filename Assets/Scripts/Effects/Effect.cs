@@ -15,6 +15,11 @@ public class Effect : NetworkBehaviour
     [SerializeField] float maxShakeIntensity = 1f;
     [SerializeField] float maxShakeRadius = 10f;
 
+    [Header("Type")]
+    [SerializeField] private bool hasRangeDamage;
+    [SerializeField] private float rangeDamage = 20;
+    [SerializeField] private int damage = 200;
+
     [Header("Sounds")]
     [SerializeField] private AudioClip hitSound;
     private AudioSource audioSource;
@@ -75,6 +80,22 @@ public class Effect : NetworkBehaviour
         {
             audioSource.PlayOneShot(hitSound);
         }
+        if (hasRangeDamage)
+        {
+            RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, rangeDamage, Vector3.forward);
+            if (hits != null)
+            {
+                foreach (RaycastHit2D hit in hits)
+                {
+                    if (hit.collider == null) continue;
+                    if (hit.collider.TryGetComponent(out Health health))
+                    {
+                        health.TakeDamage(damage);
+                    }
+
+                }
+            }
+        }
         GenerateImpulseBasedOnDistance();
     }
 
@@ -108,5 +129,11 @@ public class Effect : NetworkBehaviour
     {
         if (IsServer) { return; }
         transform.rotation = rotation;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, rangeDamage);
     }
 }

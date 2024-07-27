@@ -82,5 +82,18 @@ public class WeaponManager : MonoBehaviour
             }
         }
     }
+    public void HandleAim(bool canAim)
+    {
+        if (CurrentWeapon.TryGetComponent(out Scope scope))
+        {
+            scope.AimToTarget(canAim);
+            if (CurrentWeapon.TryGetComponent(out Laser laser))
+            {
+                laser.UpdateLaser(canAim);
+            }
+
+        }
+    }
+
 
 }

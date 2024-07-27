@@ -7,17 +7,26 @@ using UnityEngine;
 public class AIManager : NetworkBehaviour
 {
     [SerializeField] private List<Spawner> spawners;
+    [SerializeField] private List<Spawner> bossSpawners;
     private List<AIController> aIControllers;
+    private List<AIController> bossControllers;
     private List<PlayerController> players;
+
+    private bool isBossSpawned = false;
 
     public override void OnNetworkSpawn()
     {
         if (!IsServer) { return; }
         aIControllers = new List<AIController>();
+        bossControllers = new List<AIController>();
         CustomNetworkManager.PlayerAdded += RegisterPlayers;
         foreach (var spawner in spawners)
         {
             spawner.AISpawned += AddNetworkAI;
+        }
+        foreach (var bossSpawner in bossSpawners)
+        {
+            bossSpawner.AISpawned += AddNetworkBossAI;
         }
     }
 
@@ -25,12 +34,21 @@ public class AIManager : NetworkBehaviour
     {
         players = ((CustomNetworkManager)NetworkManager.Singleton).Players;
 
+
     }
     private void Update()
     {
         if (!IsServer) { return; }
         if (players == null) { return; }
         foreach (var ai in aIControllers)
+        {
+            if (ai.isActiveAndEnabled)
+            {
+                ai.UpdateAI();
+            }
+
+        }
+        foreach (var ai in bossControllers)
         {
             if (ai.isActiveAndEnabled)
             {
@@ -46,7 +64,12 @@ public class AIManager : NetworkBehaviour
         {
             controller.SetTarget(target);
         }
+        foreach (var bossController in bossControllers)
+        {
+            bossController.SetTarget(target);
+        }
     }
+
     private void AddNetworkAI(NetworkObject obj)
     {
         if (obj.TryGetComponent(out AIController aIController))
@@ -55,18 +78,44 @@ public class AIManager : NetworkBehaviour
         }
 
     }
-    public void AddAI(AIController ai)
+    private void AddNetworkBossAI(NetworkObject obj)
     {
-        aIControllers.Add(ai);
+        if (obj.TryGetComponent(out AIController aIController))
+        {
+            AddAI(aIController, true);
+        }
+
+    }
+    public void AddAI(AIController ai, bool isBoss = false)
+    {
+        if (isBoss)
+        {
+            bossControllers.Add(ai);
+        }
+        else
+        {
+            AIController.AIDead += RemoveAI;
+            aIControllers.Add(ai);
+        }
+
         if (players == null)
         {
             RegisterPlayers();
         }
         int randomIndex = Random.Range(0, players.Count);
         SetTargets(players[randomIndex].transform);
+
     }
-    public void RemoveAI(AIController ai)
+    private void RemoveAI(AIController ai)
     {
         aIControllers.Remove(ai);
+        if (aIControllers.Count == 0 && !isBossSpawned)
+        {
+            isBossSpawned = true;
+            foreach (var boss in bossSpawners)
+            {
+                boss.SpawnObject();
+            }
+        }
     }
 }

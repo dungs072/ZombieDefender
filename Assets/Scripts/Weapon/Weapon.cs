@@ -7,7 +7,8 @@ public enum WeaponName
     Pistol,
     Riffle,
     GrenadeLauncher,
-    ShotGun
+    ShotGun,
+    Sniper
 }
 public class Weapon : NetworkBehaviour, IProduct
 {
