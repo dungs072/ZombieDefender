@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Cinemachine;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ShootWeapon : Weapon
@@ -14,24 +15,27 @@ public class ShootWeapon : Weapon
     [SerializeField] private Projectile projectile;
     [SerializeField] private Transform shootPos;
 
-    [SerializeField] private int maxBullet;
+    [SerializeField] private int maxBullets;
     [SerializeField] private int maxBulletsInMag;
-
+    [SerializeField] private bool autoReload;
     [Header("Guns Type")]
     [SerializeField] private int numberBulletSpawned = 1;
-    [SerializeField] private float shootAngle = 200;
+    [SerializeField] private float spread = 10;
+    [SerializeField] private bool reloadPerBullet = false;
     private bool isReloadingFinished = true;
 
+    private int bulletLeft = 0;
 
     private int currentBulletInMag = 0;
     private void Start()
     {
+        bulletLeft = maxBullets;
         currentBulletInMag = maxBulletsInMag;
     }
 
     public override void UpdateDetailsUI()
     {
-        ChangeDetailWeapon(currentBulletInMag, maxBullet);
+        ChangeDetailWeapon(currentBulletInMag, bulletLeft);
     }
 
     protected override void Attack()
@@ -43,8 +47,8 @@ public class ShootWeapon : Weapon
         {
             if (HandleBullets())
             {
-                SpawnProjectileServerRpc();
-                TriggerShake();
+
+
             }
             else
             {
@@ -56,8 +60,15 @@ public class ShootWeapon : Weapon
     }
     private bool HandleBullets()
     {
+        if (currentBulletInMag == 0) return false;
         currentBulletInMag = Mathf.Max(currentBulletInMag - 1, 0);
-        ChangeDetailWeapon(currentBulletInMag, maxBullet);
+        ChangeDetailWeapon(currentBulletInMag, bulletLeft);
+        if (currentBulletInMag == 0 && autoReload)
+        {
+            ReloadBullet();
+        }
+        SpawnProjectileServerRpc();
+        TriggerShake();
         return currentBulletInMag > 0;
     }
     public void ReloadBullet()
@@ -79,71 +90,92 @@ public class ShootWeapon : Weapon
             currentTime -= Time.deltaTime;
             yield return null;
         }
-        if (currentBulletInMag > 0)
+        if (reloadPerBullet)
         {
-            int numberBulletNeed = maxBulletsInMag - currentBulletInMag;
-            if (maxBullet - numberBulletNeed >= 0)
+            if (currentBulletInMag < maxBulletsInMag)
             {
-                maxBullet -= numberBulletNeed;
-                currentBulletInMag += numberBulletNeed;
-            }
-            else
-            {
-                currentBulletInMag += numberBulletNeed;
-                maxBullet = 0;
+                if (bulletLeft > 0)
+                {
+                    bulletLeft--;
+                    currentBulletInMag++;
+                }
             }
 
         }
         else
         {
-            if (maxBullet - maxBulletsInMag >= 0)
+            if (currentBulletInMag > 0)
             {
-                maxBullet -= maxBulletsInMag;
-                currentBulletInMag = maxBulletsInMag;
+                int numberBulletNeed = maxBulletsInMag - currentBulletInMag;
+                if (bulletLeft - numberBulletNeed >= 0)
+                {
+                    bulletLeft -= numberBulletNeed;
+                    currentBulletInMag += numberBulletNeed;
+                }
+                else
+                {
+                    currentBulletInMag += numberBulletNeed;
+                    bulletLeft = 0;
+                }
+
             }
             else
             {
-                currentBulletInMag = maxBullet;
-                maxBullet = 0;
+                if (bulletLeft - maxBulletsInMag >= 0)
+                {
+                    bulletLeft -= maxBulletsInMag;
+                    currentBulletInMag = maxBulletsInMag;
+                }
+                else
+                {
+                    currentBulletInMag = bulletLeft;
+                    bulletLeft = 0;
+                }
+
             }
-
+            if (currentBulletInMag > 0)
+            {
+                isPauseAttacking = false;
+            }
         }
-        if (currentBulletInMag > 0)
-        {
-            isPauseAttacking = false;
-        }
 
-        ChangeDetailWeapon(currentBulletInMag, maxBullet);
+
+        ChangeDetailWeapon(currentBulletInMag, bulletLeft);
         isReloadingFinished = true;
         isPauseAttacking = !isReloadingFinished;
 
     }
     private void SpawnProjectile()
     {
+
         for (int i = 0; i < numberBulletSpawned; i++)
         {
-            Quaternion randomQuarternion = Quaternion.LookRotation(GetRandomDirection());
-            if (i == 0)
+            float currentSpread = 0;
+            if (i > 0)
             {
-                randomQuarternion = shootPos.rotation;
+                currentSpread = UnityEngine.Random.Range(-spread, spread);
             }
-
             var projectileInstance = NetworkObjectPool.Singleton.
                                    GetNetworkObject(projectile.gameObject,
-                                       shootPos.position, randomQuarternion);
+                                       shootPos.position, shootPos.rotation);
             projectileInstance.GetComponent<Projectile>().SetDamage(damage);
+
+            projectileInstance.transform.Rotate(0, 0, currentSpread);
             if (projectileInstance.IsSpawned)
             {
                 Projectile projectile = projectileInstance.GetComponent<Projectile>();
                 projectile.ToggleGameObjectClientRpc(true);
                 projectile.SetPositionClientRpc(shootPos.position);
-                projectile.SetRotationClientRpc(randomQuarternion);
+                projectile.SetRotationClientRpc(shootPos.rotation);
+                projectile.SetAngleClientRpc(spread);
             }
             else
             {
                 projectileInstance.Spawn(true);
             }
         }
+
+
 
 
     }
@@ -153,26 +185,12 @@ public class ShootWeapon : Weapon
         CameraController.Instance.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
     }
 
-    public Vector2 GetRandomDirection()
-    {
-        // // Convert the angle ranges from degrees to radians
-        // float minRad = left * Mathf.Deg2Rad;
-        // float maxRad = rightRange * Mathf.Deg2Rad;
-
-        // // Generate a random angle within the specified range
-        // float randomAngle = UnityEngine.Random.Range(minRad, maxRad);
-
-        // // Calculate the direction vector based on the random angle
-        // Vector2 direction = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
-
-        // return direction.normalized;
-        return Vector2.zero;
-    }
 
 
     [Rpc(SendTo.Server)]
     private void SpawnProjectileServerRpc()
     {
+
         SpawnProjectile();
     }
 
@@ -185,17 +203,6 @@ public class ShootWeapon : Weapon
     {
         this.shootPos = shootPos;
     }
-
-
-    // private void OnDrawGizmosSelected()
-    // {
-    //     Gizmos.color = Color.red;
-
-    //     Vector2 point = new Vector2(Mathf.Tan(shootAngle / 2) * shootPos.up.x, shootPos.up.y);
-    //     Gizmos.DrawRay(shootPos.position, point);
-    //     point = new Vector2(Mathf.Tan(-shootAngle / 2) * shootPos.up.x, shootPos.up.y);
-    //     Gizmos.DrawRay(shootPos.position, point);
-    // }
 
 
 }

@@ -15,9 +15,14 @@ public class Effect : NetworkBehaviour
     [SerializeField] float maxShakeIntensity = 1f;
     [SerializeField] float maxShakeRadius = 10f;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip hitSound;
+    private AudioSource audioSource;
+
     private NetworkObjectPool pool;
     private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
         pool = NetworkObjectPool.Singleton;
 
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
@@ -66,6 +71,10 @@ public class Effect : NetworkBehaviour
 
     public void TriggerExplosion()
     {
+        if (hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
         GenerateImpulseBasedOnDistance();
     }
 

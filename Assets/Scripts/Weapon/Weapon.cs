@@ -5,7 +5,9 @@ public enum WeaponName
 {
     Knife,
     Pistol,
-    Riffle
+    Riffle,
+    GrenadeLauncher,
+    ShotGun
 }
 public class Weapon : NetworkBehaviour, IProduct
 {

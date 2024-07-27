@@ -9,6 +9,10 @@ public class ThrowHandler : MonoBehaviour
     public void ThrowGrenade()
     {
         var itemInstance = Instantiate(itemPrefab, throwPos.position, throwPos.rotation);
+        if (itemInstance.TryGetComponent(out Grenade grenade))
+        {
+            grenade.Throw(throwPos.up);
+        }
         Destroy(itemInstance, 10f);
     }
 }

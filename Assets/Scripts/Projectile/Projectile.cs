@@ -4,21 +4,21 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class Projectile : NetworkBehaviour
 {
+    [SerializeField] private Effect hitEffect;
     [SerializeField] private Effect damageHitEffect;
+
     [SerializeField] private ReferenceItself referenceItself;
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private bool isMakingDamage;
+    [SerializeField] private TrailRenderer trail;
     private int damage = 1;
 
     public void SetDamage(int damage)
     {
         this.damage = damage;
     }
-    private void Start()
-    {
 
-    }
     public override void OnNetworkSpawn()
     {
         if (!IsServer) { return; }
@@ -48,9 +48,20 @@ public class Projectile : NetworkBehaviour
 
     private void Deactivate()
     {
+
         NetworkObjectPool.Singleton.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
         gameObject.SetActive(false);
         ToggleGameObjectClientRpc(false);
+
+
+        if (hitEffect != null)
+        {
+            SpawnEffect(hitEffect);
+        }
+        if (trail != null)
+        {
+            trail.Clear();
+        }
     }
     [Rpc(SendTo.ClientsAndHost)]
     public void ToggleGameObjectClientRpc(bool state)
@@ -70,6 +81,12 @@ public class Projectile : NetworkBehaviour
         if (IsServer) { return; }
         transform.rotation = rotation;
     }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetAngleClientRpc(float angle)
+    {
+        if (IsServer) { return; }
+        transform.Rotate(0, 0, angle);
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!IsServer) { return; }
@@ -79,18 +96,18 @@ public class Projectile : NetworkBehaviour
             if (isMakingDamage)
             {
                 health.TakeDamage(damage);
-                SpawnEffect(health.transform);
+                SpawnEffect(damageHitEffect, health.transform);
             }
         }
 
         Deactivate();
     }
 
-    protected virtual void SpawnEffect(Transform target = null)
+    protected virtual void SpawnEffect(Effect effectPrefab, Transform target = null)
     {
         Transform newTransform = target == null ? transform : target;
         var effectInstance = NetworkObjectPool.Singleton.
-                                  GetNetworkObject(damageHitEffect.gameObject,
+                                  GetNetworkObject(effectPrefab.gameObject,
                                       newTransform.position, newTransform.rotation);
         if (effectInstance.IsSpawned)
         {
