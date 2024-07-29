@@ -6,6 +6,8 @@ public class AIMovement : MonoBehaviour
 {
     [SerializeField] private float rotationSpeed;
     [SerializeField] private AIPath aiPath;
+
+    public AIPath AIPath { get { return aiPath; } }
     public void MoveToTarget(Vector3 targetPosition)
     {
         aiPath.isStopped = false;

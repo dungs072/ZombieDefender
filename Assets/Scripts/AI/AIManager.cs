@@ -1,18 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class AIManager : NetworkBehaviour
 {
-    [SerializeField] private List<Spawner> spawners;
-    [SerializeField] private List<Spawner> bossSpawners;
+    public event Action BossSpawned;
     private List<AIController> aIControllers;
     private List<AIController> bossControllers;
     private List<PlayerController> players;
 
+
     private bool isBossSpawned = false;
+
+    public bool startZombie { get; set; } = false;
 
     public override void OnNetworkSpawn()
     {
@@ -20,14 +22,7 @@ public class AIManager : NetworkBehaviour
         aIControllers = new List<AIController>();
         bossControllers = new List<AIController>();
         CustomNetworkManager.PlayerAdded += RegisterPlayers;
-        foreach (var spawner in spawners)
-        {
-            spawner.AISpawned += AddNetworkAI;
-        }
-        foreach (var bossSpawner in bossSpawners)
-        {
-            bossSpawner.AISpawned += AddNetworkBossAI;
-        }
+
     }
 
     private void RegisterPlayers()
@@ -40,6 +35,7 @@ public class AIManager : NetworkBehaviour
     {
         if (!IsServer) { return; }
         if (players == null) { return; }
+        if (!startZombie) { return; }
         foreach (var ai in aIControllers)
         {
             if (ai.isActiveAndEnabled)
@@ -70,7 +66,7 @@ public class AIManager : NetworkBehaviour
         }
     }
 
-    private void AddNetworkAI(NetworkObject obj)
+    public void AddNetworkAI(NetworkObject obj)
     {
         if (obj.TryGetComponent(out AIController aIController))
         {
@@ -78,7 +74,7 @@ public class AIManager : NetworkBehaviour
         }
 
     }
-    private void AddNetworkBossAI(NetworkObject obj)
+    public void AddNetworkBossAI(NetworkObject obj)
     {
         if (obj.TryGetComponent(out AIController aIController))
         {
@@ -102,7 +98,7 @@ public class AIManager : NetworkBehaviour
         {
             RegisterPlayers();
         }
-        int randomIndex = Random.Range(0, players.Count);
+        int randomIndex = UnityEngine.Random.Range(0, players.Count);
         SetTargets(players[randomIndex].transform);
 
     }
@@ -112,10 +108,27 @@ public class AIManager : NetworkBehaviour
         if (aIControllers.Count == 0 && !isBossSpawned)
         {
             isBossSpawned = true;
-            foreach (var boss in bossSpawners)
+            BossSpawned?.Invoke();
+        }
+    }
+    public void ResetZombies()
+    {
+        for (int i = 0; i < aIControllers.Count; i++)
+        {
+            if (aIControllers[i].gameObject.activeSelf)
             {
-                boss.SpawnObject();
+                aIControllers[i].Die();
             }
         }
+        for (int i = 0; i < bossControllers.Count; i++)
+        {
+            if (bossControllers[i].gameObject.activeSelf)
+            {
+                bossControllers[i].Die();
+            }
+        }
+
+        aIControllers.Clear();
+        bossControllers.Clear();
     }
 }

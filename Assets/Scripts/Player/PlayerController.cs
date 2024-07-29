@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
     //public static event Action<PlayerController> PlayerSpawned;
+    public event Action CharacterDiedUI;
     public static event Action<PlayerController> PlayerDespawned;
     [SerializeField] private int runEnergyAmount = 1;
     [SerializeField] private float rotationSpeed = 10;
@@ -15,17 +16,20 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private PickupHandler pickupHandler;
     [SerializeField] private ThrowHandler throwHandler;
     private Energy energy;
+    private Health health;
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
         energy = GetComponent<Energy>();
-        inputHandler.WeaponReloaded += HandleReloadWeapon;
+        health = GetComponent<Health>();
+        health.CharacterDied += HandleDeath;
         HandleInputRegister();
         ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
         Invoke(nameof(WaitToSetUp), Const.ReloadingTimeAdded);
     }
     private void HandleInputRegister()
     {
+        inputHandler.WeaponReloaded += HandleReloadWeapon;
         inputHandler.RightDashed += HandleDashLeft;
         inputHandler.LeftDashed += HandleDashRight;
         inputHandler.ItemThrown += HandleThrow;
@@ -33,7 +37,7 @@ public class PlayerController : NetworkBehaviour
     private void WaitToSetUp()
     {
         //PlayerSpawned?.Invoke(this);
-        GetComponent<Health>().Reset();
+        health.Reset();
     }
     public override void OnNetworkDespawn()
     {
@@ -45,6 +49,7 @@ public class PlayerController : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) { return; }
+        if (health.IsDead) { return; }
         HandleRotation();
         HandleMovement();
         HandleSwitchWeapon();
@@ -101,6 +106,15 @@ public class PlayerController : NetworkBehaviour
     {
         weaponManager.HandleAim(inputHandler.IsAiming);
     }
+    public void PlayUIDeath()
+    {
+        if (!IsOwner) return;
+        CharacterDiedUI?.Invoke();
+    }
+    private void HandleDeath()
+    {
+        animator.PlayDeathAnimation();
+    }
     private void HandleDashLeft()
     {
         //rb.AddForce(transform.right * dashForce, ForceMode2D.Impulse);
@@ -135,6 +149,14 @@ public class PlayerController : NetworkBehaviour
         {
             weaponManager.AddReduceReloadingTime(0.1f);
         }
+    }
+
+    public void ResetPlayer()
+    {
+        transform.position = Vector3.zero;
+        health.Reset();
+        animator.PlayIdleAnimation();
+
     }
 
 

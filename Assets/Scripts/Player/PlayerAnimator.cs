@@ -8,6 +8,8 @@ public class PlayerAnimator : NetworkBehaviour
 {
     private readonly int LocomotionValueHash = Animator.StringToHash("Locomotion");
     private readonly int AttackHash = Animator.StringToHash("Attack");
+    private readonly int DeathHash = Animator.StringToHash("Death");
+    private readonly int MainLocomotionHash = Animator.StringToHash("MainLocomotion");
     private readonly float CrossFadeInFixedTime = 0.1f;
     [SerializeField] private Animator animator;
     [SerializeField] private List<AnimatorOverrideNetwork> overrideNetworks;
@@ -19,6 +21,14 @@ public class PlayerAnimator : NetworkBehaviour
     public void PlayAttackAnimation()
     {
         animator.CrossFadeInFixedTime(AttackHash, CrossFadeInFixedTime);
+    }
+    public void PlayDeathAnimation()
+    {
+        animator.CrossFadeInFixedTime(DeathHash, CrossFadeInFixedTime);
+    }
+    public void PlayIdleAnimation()
+    {
+        animator.CrossFadeInFixedTime(MainLocomotionHash, CrossFadeInFixedTime);
     }
     public void SetAnimatorOverride(int Id, AnimatorOverrideController animatorOverride)
     {

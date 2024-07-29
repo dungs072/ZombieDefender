@@ -8,9 +8,11 @@ public class AIFighter : MonoBehaviour
     [field: SerializeField] public int Damage { get; private set; } = 5;
     [SerializeField] protected AIAnimator animator;
 
-    public virtual void Attack(Transform target)
+    public virtual void Attack(Transform target, AudioSource audioSource, ZombieSoundData zombieSoundData)
     {
         animator.ToggleAttackAnimation(true);
+        if (audioSource.isPlaying) return;
+        audioSource.PlayOneShot(zombieSoundData.GetAttack());
 
     }
 

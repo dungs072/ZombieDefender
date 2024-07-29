@@ -15,10 +15,21 @@ public class AIController : NetworkBehaviour
     [SerializeField] private AIAnimator animator;
     [SerializeField] private SpriteRenderer model;
     [SerializeField] private ReferenceItself referenceItself;
+    [SerializeField] private bool isRandomSpeed = true;
 
     [SerializeField] private float disappearTimeWhenDie = 5f;
+
+    [Header("Sounds")]
+    [SerializeField] private ZombieSoundData zombieSoundData;
     private Transform target;
     private NetworkObjectPool pool;
+
+    private AudioSource audioSource;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
 
     private void Start()
@@ -28,6 +39,12 @@ public class AIController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         health.CharacterDied += Die;
+        health.TakingDamage += PlayHitSounds;
+        if (!IsServer) return;
+        if (isRandomSpeed)
+        {
+            movement.AIPath.maxSpeed = UnityEngine.Random.Range(Const.minZombieSpeed, Const.maxZombieSpeed);
+        }
     }
     private void OnEnable()
     {
@@ -72,6 +89,8 @@ public class AIController : NetworkBehaviour
         animator.ToggleAttackAnimation(false);
         animator.ToggleWalkAnimation(true);
         movement.MoveToTarget(target.position);
+        if (audioSource.isPlaying) return;
+        audioSource.PlayOneShot(zombieSoundData.GetAlert());
     }
 
     public void AttackTarget()
@@ -79,7 +98,7 @@ public class AIController : NetworkBehaviour
         movement.ToggleStop(true);
         movement.RotateToTarget(target.position);
         animator.ToggleWalkAnimation(false);
-        fighter.Attack(target);
+        fighter.Attack(target, audioSource, zombieSoundData);
     }
 
     public void Die()
@@ -91,6 +110,7 @@ public class AIController : NetworkBehaviour
         ToggleColliderClientRpc(false);
 
         Invoke(nameof(HandleDie), disappearTimeWhenDie);
+        audioSource.PlayOneShot(zombieSoundData.GetDeath());
     }
     private void HandleDie()
     {
@@ -109,6 +129,10 @@ public class AIController : NetworkBehaviour
         if (transform == null) { return false; }
         if (target == null) { return false; }
         return (target.position - transform.position).sqrMagnitude <= distance * distance;
+    }
+    public void PlayHitSounds()
+    {
+        audioSource.PlayOneShot(zombieSoundData.GetBulletHit());
     }
     [Rpc(SendTo.Everyone)]
     private void ToggleGameobjectClientRpc(bool state)

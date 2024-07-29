@@ -21,21 +21,25 @@ public class Spawner : NetworkBehaviour
     {
         currentTime = 2;
     }
-    private void Update()
+    public void UpdateSpawner()
     {
         if (!spawnOverTime) return;
         if (!IsServer) return;
         currentTime -= Time.deltaTime;
         if (currentTime <= 0)
         {
-            SpawnObject();
+            SpawnObject(Vector3.zero);
             currentTime = maxTimeToSpawn;
         }
     }
-    public void SpawnObject()
+    public AIController SpawnObject(Vector3 position)
     {
-        if (zombies.Count == maxTimeToSpawn) return;
+        if (zombies.Count == maxTimeToSpawn) return null;
         Vector3 randomPosition = GetRandomPosition();
+        if (position != Vector3.zero)
+        {
+            randomPosition = position;
+        }
         randomPosition.z = 0;
         int randomIndex = UnityEngine.Random.Range(0, prefabs.Count);
         var instance = NetworkObjectPool.Singleton.
@@ -54,6 +58,7 @@ public class Spawner : NetworkBehaviour
             instance.Spawn(true);
         }
         zombies.Add(instance.gameObject);
+        return instance.GetComponent<AIController>();
     }
     private Vector3 GetRandomPosition()
     {
@@ -71,6 +76,10 @@ public class Spawner : NetworkBehaviour
             }
         }
         return true;
+    }
+    public void ResetSpawner()
+    {
+        zombies.Clear();
     }
     private void OnDrawGizmos()
     {

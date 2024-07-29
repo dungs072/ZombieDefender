@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class SceneController : NetworkBehaviour
 {
     [SerializeField] private LoadingUI loadingUI;
-    private readonly string jungleSceneName = "JungleScene";
+
 
     public static SceneController Instance { get; private set; }
     private void Awake()
@@ -29,7 +29,7 @@ public class SceneController : NetworkBehaviour
     {
         //NetworkManager.Singleton.SceneManager.OnSceneEvent -= SceneManager_OnSceneEvent;
     }
-    public void StartMyServer(bool isHost)
+    public void StartMyServer(bool isHost, string sceneName)
     {
         var success = false;
         if (isHost)
@@ -45,20 +45,20 @@ public class SceneController : NetworkBehaviour
         if (success)
         {
 
-            NetworkManager.Singleton.SceneManager.LoadScene(jungleSceneName, LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
 
 
         //return success;
     }
 
-    public void StartMyClient()
+    public void StartMyClient(string sceneName)
     {
         var success = NetworkManager.Singleton.StartClient();
         if (success)
         {
             NetworkManager.Singleton.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
-            NetworkManager.Singleton.SceneManager.LoadScene(jungleSceneName, LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
 
         //return success;

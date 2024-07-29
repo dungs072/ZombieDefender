@@ -34,6 +34,10 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private Image bloodDamageImage;
     [SerializeField] private float fadeInValue;
     [SerializeField] private float fadeDuration = 0.4f;
+    [Header("Game Over")]
+    [SerializeField] private RectTransform gameOverPanel;
+    [Header("Main Game")]
+    [SerializeField] private RectTransform mainGamePanel;
 
     private void Start()
     {
@@ -93,6 +97,7 @@ public class InGameUI : MonoBehaviour
         health.HealthChanged += UpdateHealthBar;
         health.TakingDamage += FadeBloodImageIn;
         energy.EnergyChanged += UpdateEnergyBar;
+        player.CharacterDiedUI += TurnOnGameOver;
 
         health.TakeDamage(0);
         energy.UseEnergy(0);
@@ -180,5 +185,31 @@ public class InGameUI : MonoBehaviour
 
             });
         });
+    }
+    private void TurnOnGameOver()
+    {
+        ToggleGameOver(true);
+    }
+    public void ToggleGameOver(bool state)
+    {
+        mainGamePanel.gameObject.SetActive(!state);
+        blackout.SetActive(state);
+        if (state)
+        {
+            gameOverPanel.gameObject.SetActive(state);
+
+            if (gameOverPanel.localScale != Vector3.zero)
+            {
+                gameOverPanel.localScale = Vector3.zero;
+            }
+            LeanTween.scale(gameOverPanel, Vector3.one, 0.3f).setEase(LeanTweenType.easeInOutSine);
+        }
+        else
+        {
+            LeanTween.scale(gameOverPanel, Vector3.zero, 0.3f).setEase(LeanTweenType.easeInOutSine).setOnComplete(() =>
+            {
+                gameOverPanel.gameObject.SetActive(state);
+            });
+        }
     }
 }

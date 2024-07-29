@@ -8,7 +8,7 @@ public class AIFighterShooting : AIFighter
     [SerializeField] private float meleeDistance = 3;
     private float currentTime = 0;
 
-    public override void Attack(Transform target)
+    public override void Attack(Transform target, AudioSource audioSource, ZombieSoundData zombieSoundData)
     {
         animator.ToggleWalkAnimation(false);
         if (IsInDistance(target.position, meleeDistance))
@@ -26,6 +26,8 @@ public class AIFighterShooting : AIFighter
                 animator.ToggleAttackAnimation(false);
                 animator.PlayShootAnimation();
                 currentTime = maxTimeToSpawn;
+                if (audioSource.isPlaying) return;
+                audioSource.PlayOneShot(zombieSoundData.GetAttack());
 
             }
         }

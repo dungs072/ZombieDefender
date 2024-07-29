@@ -16,6 +16,8 @@ public class AIBossFighter : AIFighter
     [Header("Arm Fighter")]
     [SerializeField] private Projectile armPrefab;
     [SerializeField] private Transform armShootPos;
+    [Header("Sounds")]
+    [SerializeField] private BossZombieSoundData bossZombieSoundData;
 
     private AIBossAnimator bossAnimator;
     private float currentTime = 0;
@@ -24,13 +26,15 @@ public class AIBossFighter : AIFighter
         bossAnimator = animator as AIBossAnimator;
     }
 
-    public override void Attack(Transform target)
+    public override void Attack(Transform target, AudioSource audioSource, ZombieSoundData zombieSoundData)
     {
         bossAnimator.ToggleWalkAnimation(false);
         if (IsInDistance(target.position, meleeDistance))
         {
 
             bossAnimator.ToggleAttackAnimation(true);
+            if (audioSource.isPlaying) return;
+            audioSource.PlayOneShot(zombieSoundData.GetAttack());
 
         }
         else
@@ -40,8 +44,9 @@ public class AIBossFighter : AIFighter
             if (currentTime <= 0)
             {
                 bossAnimator.ToggleAttackAnimation(false);
-                PlayRandomShootAnimation();
+                PlayRandomShootAnimation(audioSource, zombieSoundData);
                 currentTime = maxTimeToSpawn;
+
 
             }
         }
@@ -77,12 +82,14 @@ public class AIBossFighter : AIFighter
         SpawnProjectile(armPrefab, armShootPos);
     }
 
-    public void PlayRandomShootAnimation()
+    public void PlayRandomShootAnimation(AudioSource audioSource, ZombieSoundData zombieSoundData)
     {
+
         float randomValue = UnityEngine.Random.Range(0, 1f);
         if (randomValue < 0.3)
         {
             bossAnimator.PlayShootAnimation();
+
         }
         else if (randomValue > 0.7)
         {
@@ -92,6 +99,8 @@ public class AIBossFighter : AIFighter
         {
             bossAnimator.PlayShootToAnimation();
         }
+        if (audioSource.isPlaying) return;
+        audioSource.PlayOneShot(zombieSoundData.GetThrow());
     }
     private bool IsInDistance(Vector3 targetPos, float distance)
     {
