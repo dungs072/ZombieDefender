@@ -10,8 +10,11 @@ public class Scope : MonoBehaviour
     [SerializeField] private float transitionTime = 0.5f;
     private CameraController cameraController;
 
+
+
     public void AimToTarget(bool aim)
     {
+        if (CameraController.Instance == null) return;
         cameraController = CameraController.Instance;
         float targetDistance = aim ? farDistance : normalDistance;
         LeanTween.value(gameObject, UpdateCameraSize,

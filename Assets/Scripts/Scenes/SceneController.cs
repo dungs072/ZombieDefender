@@ -31,22 +31,22 @@ public class SceneController : NetworkBehaviour
     }
     public void StartMyServer(bool isHost, string sceneName)
     {
-        var success = false;
+        // var success = false;
         if (isHost)
         {
-            success = NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.StartHost();
         }
-        else
-        {
-            success = NetworkManager.Singleton.StartServer();
-        }
+        // else
+        // {
+        //     success = NetworkManager.Singleton.StartServer();
+        // }
+
+        NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        // if (success)
+        // {
 
 
-        if (success)
-        {
-
-            NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-        }
+        // }
 
 
         //return success;
