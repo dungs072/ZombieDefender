@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
@@ -12,10 +13,26 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 2f;
     [SerializeField] private bool isMakingDamage;
     [SerializeField] private TrailRenderer trail;
+
+    private List<Effect> effects = new List<Effect>();
+    private void Awake()
+    {
+        effects.Add(damageHitEffect);
+        if (hitEffect)
+        {
+            effects.Add(hitEffect);
+        }
+
+
+    }
     private int damage = 1;
 
     public void SetDamage(int damage)
     {
+        if (trail != null)
+        {
+            trail.Clear();
+        }
         this.damage = damage;
     }
 
@@ -37,6 +54,7 @@ public class Projectile : NetworkBehaviour
 
     private void OnDisable()
     {
+
         if (!IsServer) { return; }
         CancelInvoke();
     }
@@ -48,7 +66,7 @@ public class Projectile : NetworkBehaviour
 
     private void Deactivate()
     {
-
+        if (!IsOwner) return;
         NetworkObjectPool.Singleton.ReturnNetworkObject(GetComponent<NetworkObject>(), referenceItself.Prefab);
         gameObject.SetActive(false);
         ToggleGameObjectClientRpc(false);
@@ -56,7 +74,8 @@ public class Projectile : NetworkBehaviour
 
         if (hitEffect != null)
         {
-            SpawnEffect(hitEffect);
+            var effect = effects[1];
+            SpawnEffect(effect, transform.position, transform.rotation);
         }
         if (trail != null)
         {
@@ -74,6 +93,10 @@ public class Projectile : NetworkBehaviour
     {
         if (IsServer) { return; }
         transform.position = position;
+        if (trail != null)
+        {
+            trail.Clear();
+        }
     }
     [Rpc(SendTo.ClientsAndHost)]
     public void SetRotationClientRpc(Quaternion rotation)
@@ -87,28 +110,39 @@ public class Projectile : NetworkBehaviour
         if (IsServer) { return; }
         transform.Rotate(0, 0, angle);
     }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetDamageRpc(int damage)
+    {
+        if (IsServer) { return; }
+        SetDamage(damage);
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!IsServer) { return; }
 
         if (other.TryGetComponent(out Health health))
         {
+            if (!health.IsOwner) return;
             if (isMakingDamage)
             {
                 health.TakeDamage(damage);
-                SpawnEffect(damageHitEffect, health.transform);
+                SpawnEffectServerRpc(0, health.transform.position, health.transform.rotation);
             }
         }
 
         Deactivate();
     }
-
-    protected virtual void SpawnEffect(Effect effectPrefab, Transform target = null)
+    [Rpc(SendTo.Server)]
+    private void SpawnEffectServerRpc(int prefabIndex, Vector3 position, Quaternion quaternion)
     {
-        Transform newTransform = target == null ? transform : target;
+        Effect effectPrefab = effects[prefabIndex];
+        SpawnEffect(effectPrefab, position, quaternion);
+    }
+
+    protected virtual void SpawnEffect(Effect effectPrefab, Vector3 position, Quaternion quaternion)
+    {
         var effectInstance = NetworkObjectPool.Singleton.
                                   GetNetworkObject(effectPrefab.gameObject,
-                                      newTransform.position, newTransform.rotation);
+                                      position, quaternion);
         if (effectInstance.IsSpawned)
         {
 
@@ -116,8 +150,8 @@ public class Projectile : NetworkBehaviour
             {
 
                 effect.ToggleGameObjectClientRpc(true);
-                effect.SetPositionClientRpc(newTransform.position);
-                effect.SetRotationClientRpc(newTransform.rotation);
+                effect.SetPositionClientRpc(position);
+                effect.SetRotationClientRpc(quaternion);
             }
 
         }

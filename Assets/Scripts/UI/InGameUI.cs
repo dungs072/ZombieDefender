@@ -41,8 +41,6 @@ public class InGameUI : MonoBehaviour
 
     private void Start()
     {
-        // PlayerController.PlayerSpawned += HandlePlayerSpawned;
-        // PlayerController.PlayerDespawned += HandlePlayerDespawned;
         var ownedPlayer = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
         HandlePlayerSpawned(ownedPlayer);
 
@@ -59,8 +57,6 @@ public class InGameUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        // PlayerController.PlayerSpawned -= HandlePlayerSpawned;
-        // PlayerController.PlayerDespawned -= HandlePlayerDespawned;
         PickupHandler.ItemPicked -= TogglePickupImage;
         PickupHandler.HoldingPickup -= SetReloadingBar;
         MoneyManager.MoneyChanged -= SetMoneyText;
@@ -69,7 +65,6 @@ public class InGameUI : MonoBehaviour
         WeaponManager.WeaponChanged -= SetWeaponIcon;
         Weapon.DetailChanged -= SetWeaponDetail;
         ShootWeapon.ReloadingTimeChanged -= SetReloadingBar;
-        // ShootWeapon.ReloadingTimeStartChanged -= BlinkReloadingText;
     }
     private void TogglePickupImage(bool state, string nameItem)
     {

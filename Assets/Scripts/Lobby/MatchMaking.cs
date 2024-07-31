@@ -25,6 +25,10 @@ public static class MatchMaking
     }
 
     public static event Action<Lobby> CurrentLobbyRefreshed;
+    public static Lobby GetCurrentLobby()
+    {
+        return _currentLobby;
+    }
 
     public static void ResetStatics()
     {
@@ -61,12 +65,15 @@ public static class MatchMaking
         var a = await RelayService.Instance.CreateAllocationAsync(data.MaxPlayers);
         var joinCode = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
         // Create a lobby, adding the relay join code to the lobby data
+        Debug.Log(data.ToString());
         var options = new CreateLobbyOptions
         {
             IsPrivate = false,
             Data = new Dictionary<string, DataObject> {
                 { Constants.JoinKey, new DataObject(DataObject.VisibilityOptions.Member, joinCode) },
-                { Constants.GameTypeKey, new DataObject(DataObject.VisibilityOptions.Public, data.Type, DataObject.IndexOptions.S5) }, {
+                { Constants.GameTypeKey, new DataObject(DataObject.VisibilityOptions.Public, data.Type, DataObject.IndexOptions.S5) },
+                { Constants.MapNameKey, new DataObject(DataObject.VisibilityOptions.Public, data.MapName, DataObject.IndexOptions.S4) },
+                {
                     Constants.DifficultyKey,
                     new DataObject(DataObject.VisibilityOptions.Public, data.Difficulty.ToString(), DataObject.IndexOptions.N2)
                 }
@@ -93,6 +100,8 @@ public static class MatchMaking
         }
     }
 
+
+
     private static async void Heartbeat()
     {
         _heartbeatSource = new CancellationTokenSource();
@@ -110,7 +119,7 @@ public static class MatchMaking
 
         Transport.SetClientRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData, a.HostConnectionData);
 
-        PeriodicallyRefreshLobby();
+        //PeriodicallyRefreshLobby();
     }
 
     private static async void PeriodicallyRefreshLobby()
@@ -149,7 +158,7 @@ public struct LobbyData
     public int MaxPlayers;
     public int Difficulty;
     public string Type;
-    public int MapId;
+    public string MapName;
 
-    public override string ToString() => $"{Name} ({MaxPlayers}) ({Difficulty}) ({Type}) ({MapId})";
+    public override string ToString() => $"{Name} ({MaxPlayers}) ({Difficulty}) ({Type}) ({MapName})";
 }

@@ -15,18 +15,19 @@ public class CreateLobbyUI : MonoBehaviour
     [SerializeField] private Toggle pvpToggle;
     [SerializeField] private Image mapImage;
 
-    private int mapId = -1;
+    private string mapName = "JungleScene";
 
     public async void CreateLobby()
     {
         string lobbyName = lobbyNameInput.text == "" ? "No name" : lobbyNameInput.text.Trim();
+        string type = pvpToggle.isOn ? "PVP" : "PVE";
         LobbyData lobbyData = new LobbyData()
         {
             Name = lobbyName,
             Difficulty = 0,
             MaxPlayers = int.Parse(maxPlayerInput.text.Trim()),
-            Type = pvpToggle.isOn ? "PVP" : "PVE",
-            MapId = mapId,
+            Type = type,
+            MapName = mapName + type,
         };
         await MatchMaking.CreateLobbyWithAllocation(lobbyData, () =>
         {

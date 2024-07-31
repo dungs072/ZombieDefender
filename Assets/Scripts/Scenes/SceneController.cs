@@ -7,7 +7,7 @@ public class SceneController : NetworkBehaviour
 {
     [SerializeField] private LoadingUI loadingUI;
 
-
+    public bool IsLoadCurrentSceneFinished { get; private set; } = false;
     public static SceneController Instance { get; private set; }
     private void Awake()
     {
@@ -40,8 +40,9 @@ public class SceneController : NetworkBehaviour
         // {
         //     success = NetworkManager.Singleton.StartServer();
         // }
-
+        IsLoadCurrentSceneFinished = false;
         NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+
         // if (success)
         // {
 
@@ -57,7 +58,7 @@ public class SceneController : NetworkBehaviour
         var success = NetworkManager.Singleton.StartClient();
         if (success)
         {
-            NetworkManager.Singleton.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
+            IsLoadCurrentSceneFinished = true;
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
 
@@ -187,7 +188,9 @@ public class SceneController : NetworkBehaviour
                 loadingUI.SetLoadingText("Press any key to continue");
                 if (Input.anyKey)
                 {
+                    IsLoadCurrentSceneFinished = true;
                     asyncOperation.allowSceneActivation = true;
+
                 }
 
             }

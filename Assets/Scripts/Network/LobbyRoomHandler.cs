@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 public class LobbyRoomHandler : NetworkBehaviour
@@ -125,6 +127,12 @@ public class LobbyRoomHandler : NetworkBehaviour
     public async void OnGameStart()
     {
         await MatchMaking.LockLobby();
-        SceneController.Instance.StartMyServer(false, "JungleScene");
+        Lobby lobby = MatchMaking.GetCurrentLobby();
+        SceneController.Instance.StartMyServer(false, GetStringValue(Constants.MapNameKey));
+
+        string GetStringValue(string key)
+        {
+            return lobby.Data[key].Value;
+        }
     }
 }

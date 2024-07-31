@@ -24,7 +24,7 @@ public class Health : NetworkBehaviour
     }
     public void TakeDamage(int damage)
     {
-        if (!IsServer || !IsOwner) { return; }
+        if (!IsOwner) { return; }
         if (currentHealth == 0) { return; }
         currentHealth = Mathf.Max(currentHealth - damage, 0);
         HealthChanged?.Invoke(currentHealth, maxHealth);

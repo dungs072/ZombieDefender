@@ -160,10 +160,12 @@ public class ShootWeapon : Weapon
             if (projectileInstance.IsSpawned)
             {
                 Projectile projectile = projectileInstance.GetComponent<Projectile>();
-                projectile.ToggleGameObjectClientRpc(true);
                 projectile.SetPositionClientRpc(shootPos.position);
                 projectile.SetRotationClientRpc(shootPos.rotation);
-                projectile.SetAngleClientRpc(spread);
+                projectile.SetAngleClientRpc(currentSpread);
+                projectile.SetDamageRpc(damage);
+                projectile.ToggleGameObjectClientRpc(true);
+
             }
             else
             {

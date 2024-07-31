@@ -14,10 +14,7 @@ public class ListLobbyUI : MonoBehaviour
 
     [SerializeField] private Transform content;
     private List<LobbyItem> lobbyItems = new List<LobbyItem>();
-    private void Start()
-    {
-        LobbyRoomHandler.LobbyPlayersUpdated += UpdateLobby;
-    }
+
     public async void FindLobbies()
     {
         foreach (var item in lobbyItems)
@@ -44,7 +41,6 @@ public class ListLobbyUI : MonoBehaviour
         try
         {
             await MatchMaking.JoinLobbyWithAllocation(lobby.Id);
-
             NetworkManager.Singleton.StartClient();
             lobbyUI.TogglePanel(true);
             TogglePanel(false);
@@ -75,10 +71,7 @@ public class ListLobbyUI : MonoBehaviour
             });
         }
     }
-    private void UpdateLobby(Dictionary<ulong, bool> players)
-    {
 
-    }
 
 }
 

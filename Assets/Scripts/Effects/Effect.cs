@@ -82,13 +82,13 @@ public class Effect : NetworkBehaviour
         }
         if (hasRangeDamage)
         {
-            RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, rangeDamage, Vector3.forward);
-            if (hits != null)
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, rangeDamage);
+            if (colliders != null)
             {
-                foreach (RaycastHit2D hit in hits)
+                foreach (Collider2D collider in colliders)
                 {
-                    if (hit.collider == null) continue;
-                    if (hit.collider.TryGetComponent(out Health health))
+                    if (collider == null) continue;
+                    if (collider.TryGetComponent(out Health health))
                     {
                         health.TakeDamage(damage);
                     }

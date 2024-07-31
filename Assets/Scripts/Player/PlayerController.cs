@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
-    //public static event Action<PlayerController> PlayerSpawned;
+    public static event Action<PlayerController> PlayerSpawned;
     public event Action CharacterDiedUI;
     public static event Action<PlayerController> PlayerDespawned;
     [SerializeField] private int runEnergyAmount = 1;
@@ -17,8 +17,16 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private ThrowHandler throwHandler;
     private Energy energy;
     private Health health;
+
+
+
     public override void OnNetworkSpawn()
     {
+        if (IsServer)
+        {
+            PlayerSpawned?.Invoke(this);
+
+        }
         if (!IsOwner) return;
         energy = GetComponent<Energy>();
         health = GetComponent<Health>();
@@ -50,6 +58,7 @@ public class PlayerController : NetworkBehaviour
     {
         if (!IsOwner) { return; }
         if (health.IsDead) { return; }
+        if (!SceneController.Instance.IsLoadCurrentSceneFinished) return;
         HandleRotation();
         HandleMovement();
         HandleSwitchWeapon();
