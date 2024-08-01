@@ -25,6 +25,7 @@ public class Effect : NetworkBehaviour
     private AudioSource audioSource;
 
     private NetworkObjectPool pool;
+    public ulong OwnerId { get; set; }
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -90,7 +91,7 @@ public class Effect : NetworkBehaviour
                     if (collider == null) continue;
                     if (collider.TryGetComponent(out Health health))
                     {
-                        health.TakeDamage(damage);
+                        health.TakeDamage(OwnerId, damage);
                     }
 
                 }

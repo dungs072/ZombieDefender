@@ -5,8 +5,10 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
 public class InGameUI : MonoBehaviour
 {
+    public static event Action GameOverPVPUIOn;
     [Header("Weapon")]
     [SerializeField] private Image weaponIcon;
     [SerializeField] private TMP_Text weaponDetail;
@@ -36,6 +38,8 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private float fadeDuration = 0.4f;
     [Header("Game Over")]
     [SerializeField] private RectTransform gameOverPanel;
+    [SerializeField] private RectTransform gameOverPVPPanel;
+    [SerializeField] private TMP_Text spawnTimeText;
     [Header("Main Game")]
     [SerializeField] private RectTransform mainGamePanel;
 
@@ -53,6 +57,14 @@ public class InGameUI : MonoBehaviour
         Weapon.DetailChanged += SetWeaponDetail;
 
         ShootWeapon.ReloadingTimeChanged += SetReloadingBar;
+
+        TimeManager.SpawnTimeFinished += () =>
+        {
+            TogglePVPGameOver(false);
+        };
+        TimeManager.CountingDownSpawnTime += SetGameOverRespawnText;
+        SetScore("0");
+
     }
 
     private void OnDestroy()
@@ -94,7 +106,7 @@ public class InGameUI : MonoBehaviour
         energy.EnergyChanged += UpdateEnergyBar;
         player.CharacterDiedUI += TurnOnGameOver;
 
-        health.TakeDamage(0);
+        health.TakeDamage(health.NetworkObjectId, 0);
         energy.UseEnergy(0);
 
     }
@@ -183,7 +195,26 @@ public class InGameUI : MonoBehaviour
     }
     private void TurnOnGameOver()
     {
-        ToggleGameOver(true);
+        Lobby lobby = MatchMaking.GetCurrentLobby();
+        string mode = GetStringValue(Constants.GameTypeKey);
+
+        string GetStringValue(string key)
+        {
+            return lobby.Data[key].Value;
+        }
+        if (mode == "PVP")
+        {
+            TogglePVPGameOver(true);
+        }
+        else
+        {
+            ToggleGameOver(true);
+        }
+
+    }
+    public void SetGameOverRespawnText(string text)
+    {
+        spawnTimeText.text = text;
     }
     public void ToggleGameOver(bool state)
     {
@@ -204,6 +235,32 @@ public class InGameUI : MonoBehaviour
             LeanTween.scale(gameOverPanel, Vector3.zero, 0.3f).setEase(LeanTweenType.easeInOutSine).setOnComplete(() =>
             {
                 gameOverPanel.gameObject.SetActive(state);
+            });
+        }
+    }
+    public void TogglePVPGameOver(bool state)
+    {
+        mainGamePanel.gameObject.SetActive(!state);
+        blackout.SetActive(state);
+        if (state)
+        {
+            gameOverPVPPanel.gameObject.SetActive(state);
+
+            if (gameOverPVPPanel.localScale != Vector3.zero)
+            {
+                gameOverPVPPanel.localScale = Vector3.zero;
+            }
+            LeanTween.scale(gameOverPVPPanel, Vector3.one, 0.3f).
+                    setEase(LeanTweenType.easeInOutSine).setOnComplete(() =>
+            {
+                GameOverPVPUIOn?.Invoke();
+            });
+        }
+        else
+        {
+            LeanTween.scale(gameOverPVPPanel, Vector3.zero, 0.3f).setEase(LeanTweenType.easeInOutSine).setOnComplete(() =>
+            {
+                gameOverPVPPanel.gameObject.SetActive(state);
             });
         }
     }

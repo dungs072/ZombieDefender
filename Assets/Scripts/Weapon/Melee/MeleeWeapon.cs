@@ -16,7 +16,7 @@ public class MeleeWeapon : Weapon
         if (!IsServer) { return; }
         if (other.TryGetComponent(out Health health))
         {
-            health.TakeDamage(damage);
+            health.TakeDamage(NetworkObjectId, damage);
             SpawnEffect(health.transform.position);
         }
 

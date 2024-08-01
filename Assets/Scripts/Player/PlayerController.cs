@@ -22,6 +22,7 @@ public class PlayerController : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
         if (IsServer)
         {
             PlayerSpawned?.Invoke(this);
@@ -32,7 +33,7 @@ public class PlayerController : NetworkBehaviour
         health = GetComponent<Health>();
         health.CharacterDied += HandleDeath;
         HandleInputRegister();
-        ((CustomNetworkManager)NetworkManager.Singleton).AddPlayer(this);
+
         Invoke(nameof(WaitToSetUp), Const.ReloadingTimeAdded);
     }
     private void HandleInputRegister()

@@ -11,6 +11,10 @@ public class Laser : MonoBehaviour
     {
         trailRenderer.gameObject.SetActive(false);
     }
+    public void SetLaserFirePoint(Transform laserFirePoint)
+    {
+        this.laserFirePoint = laserFirePoint;
+    }
     public void UpdateLaser(bool canUseLineRenderer)
     {
         if (canUseLineRenderer)

@@ -21,6 +21,7 @@ public class Weapon : NetworkBehaviour, IProduct
     [SerializeField] private AnimatorOverrideController overrideAnimator;
     [SerializeField] private Sprite weaponIcon;
     [SerializeField] private AudioClip attackSound;
+
     protected bool canAttack = true;
     protected bool isPauseAttacking = false;
 

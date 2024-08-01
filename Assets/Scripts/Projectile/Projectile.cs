@@ -14,6 +14,15 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private bool isMakingDamage;
     [SerializeField] private TrailRenderer trail;
 
+    private NetworkVariable<ulong> ownerIdNetwork = new NetworkVariable<ulong>(default,
+                                                NetworkVariableReadPermission.Everyone,
+                                                NetworkVariableWritePermission.Server);
+
+    public void SetOwnerIdServer(ulong networkId)
+    {
+        ownerIdNetwork.Value = networkId;
+    }
+
     private List<Effect> effects = new List<Effect>();
     private void Awake()
     {
@@ -75,7 +84,7 @@ public class Projectile : NetworkBehaviour
         if (hitEffect != null)
         {
             var effect = effects[1];
-            SpawnEffect(effect, transform.position, transform.rotation);
+            SpawnEffect(effect, transform.position, transform.rotation, ownerIdNetwork.Value);
         }
         if (trail != null)
         {
@@ -124,21 +133,21 @@ public class Projectile : NetworkBehaviour
             if (!health.IsOwner) return;
             if (isMakingDamage)
             {
-                health.TakeDamage(damage);
-                SpawnEffectServerRpc(0, health.transform.position, health.transform.rotation);
+                health.TakeDamage(ownerIdNetwork.Value, damage);
+                SpawnEffectServerRpc(0, health.transform.position, health.transform.rotation, ownerIdNetwork.Value);
             }
         }
 
         Deactivate();
     }
     [Rpc(SendTo.Server)]
-    private void SpawnEffectServerRpc(int prefabIndex, Vector3 position, Quaternion quaternion)
+    private void SpawnEffectServerRpc(int prefabIndex, Vector3 position, Quaternion quaternion, ulong ownerId)
     {
         Effect effectPrefab = effects[prefabIndex];
-        SpawnEffect(effectPrefab, position, quaternion);
+        SpawnEffect(effectPrefab, position, quaternion, ownerId);
     }
 
-    protected virtual void SpawnEffect(Effect effectPrefab, Vector3 position, Quaternion quaternion)
+    protected virtual void SpawnEffect(Effect effectPrefab, Vector3 position, Quaternion quaternion, ulong ownerId)
     {
         var effectInstance = NetworkObjectPool.Singleton.
                                   GetNetworkObject(effectPrefab.gameObject,
@@ -152,11 +161,13 @@ public class Projectile : NetworkBehaviour
                 effect.ToggleGameObjectClientRpc(true);
                 effect.SetPositionClientRpc(position);
                 effect.SetRotationClientRpc(quaternion);
+                effect.OwnerId = ownerId;
             }
 
         }
         else
         {
+            effectInstance.GetComponent<Effect>().OwnerId = ownerId;
             effectInstance.Spawn(true);
         }
     }

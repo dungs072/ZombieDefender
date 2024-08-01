@@ -155,7 +155,7 @@ public class ShootWeapon : Weapon
                                    GetNetworkObject(projectile.gameObject,
                                        shootPos.position, shootPos.rotation);
             projectileInstance.GetComponent<Projectile>().SetDamage(damage);
-
+            projectileInstance.GetComponent<Projectile>().SetOwnerIdServer(NetworkObjectId);
             projectileInstance.transform.Rotate(0, 0, currentSpread);
             if (projectileInstance.IsSpawned)
             {
@@ -165,6 +165,7 @@ public class ShootWeapon : Weapon
                 projectile.SetAngleClientRpc(currentSpread);
                 projectile.SetDamageRpc(damage);
                 projectile.ToggleGameObjectClientRpc(true);
+                projectile.SetOwnerIdServer(NetworkObjectId);
 
             }
             else
@@ -191,6 +192,8 @@ public class ShootWeapon : Weapon
 
         SpawnProjectile();
     }
+
+
 
     public void ReduceReloadingTime(float time)
     {

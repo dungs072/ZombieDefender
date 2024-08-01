@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class WeaponManager : MonoBehaviour
+public class WeaponManager : NetworkBehaviour
 {
     public static event Action<Sprite> WeaponChanged;
     [SerializeField] private PlayerAnimator playerAnimator;
     [SerializeField] private List<Weapon> weapons;
     [SerializeField] private Transform shootPos;
     [SerializeField] private Transform weaponPack;
+    [SerializeField] private List<Weapon> weaponResources;
     public Weapon CurrentWeapon { get; private set; }
 
 
@@ -44,9 +45,35 @@ public class WeaponManager : MonoBehaviour
         {
             var shootWeapon = (ShootWeapon)weapon;
             shootWeapon.SetShootPos(shootPos);
+            if (shootWeapon.TryGetComponent(out Laser laser))
+            {
+                laser.SetLaserFirePoint(shootPos);
+            }
         }
         SetCurrentWeapon(weapons[currentWeaponIndex]);
 
+    }
+    public void RemoveLastWeapon()
+    {
+        currentWeaponIndex = 0;
+        SetCurrentWeapon(weapons[0]);
+        if (weapons.Count == 1) return;
+        weapons.RemoveAt(1);
+    }
+    public void SpawnRandomWeapon()
+    {
+        int weaponIndex = UnityEngine.Random.Range(0, weaponResources.Count);
+        AddWeapon(weaponResources[weaponIndex]);
+
+    }
+    private IEnumerator DelaySetUp(Weapon weaponInstance)
+    {
+        while (!weaponInstance.TryGetComponent(out NetworkObject networkObject))
+        {
+            Debug.Log(networkObject);
+            yield return null;
+        }
+        weaponInstance.GetComponent<NetworkObject>().Spawn(true);
     }
 
 
@@ -55,6 +82,7 @@ public class WeaponManager : MonoBehaviour
         if (CurrentWeapon != null)
         {
             CurrentWeapon.AttackingWeapon -= playerAnimator.PlayAttackAnimation;
+
         }
         CurrentWeapon = weapon;
         CurrentWeapon.AttackingWeapon += playerAnimator.PlayAttackAnimation;

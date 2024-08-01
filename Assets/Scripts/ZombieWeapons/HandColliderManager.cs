@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class HandColliderManager : MonoBehaviour
+public class HandColliderManager : NetworkBehaviour
 {
     [SerializeField] private Effect bloodHitEffect;
     [SerializeField] private AIFighter fighter;
@@ -15,7 +16,7 @@ public class HandColliderManager : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerController player))
         {
-            player.GetComponent<Health>().TakeDamage(fighter.Damage);
+            player.GetComponent<Health>().TakeDamage(NetworkObjectId, fighter.Damage);
             if (player.IsServer)
             {
                 SpawnEffect(player.transform.position);

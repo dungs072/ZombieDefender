@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class Health : NetworkBehaviour
 {
+    public static event Action<ulong> CharacterKilled;
     public event Action TakingDamage;
     public event Action<int, int> HealthChanged;
     public event Action CharacterDied;
+
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private DamageUI damageUIPrefab;
 
@@ -22,7 +24,7 @@ public class Health : NetworkBehaviour
     {
         Reset();
     }
-    public void TakeDamage(int damage)
+    public void TakeDamage(ulong killerId, int damage)
     {
         if (!IsOwner) { return; }
         if (currentHealth == 0) { return; }
@@ -33,6 +35,7 @@ public class Health : NetworkBehaviour
         if (currentHealth <= 0)
         {
             CharacterDied?.Invoke();
+            CharacterKilled?.Invoke(killerId);
             IsDead = true;
         }
         if (damage > 0)
