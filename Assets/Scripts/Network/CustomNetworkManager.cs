@@ -10,6 +10,19 @@ public class CustomNetworkManager : NetworkManager
     private List<PlayerController> players = new List<PlayerController>();
     public PlayerController OwnerPlayer { get; private set; }
     public List<PlayerController> Players { get { return players; } }
+    private static CustomNetworkManager instance;
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
     public void AddPlayer(PlayerController player)
     {
         if (player.IsOwner)

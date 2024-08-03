@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -42,6 +43,6 @@ public class LevelManager : MonoBehaviour
     public void PlayLevel()
     {
         if (currentLevelIndex == -1) return;
-        SceneController.Instance.StartMyServer(true, levels[currentLevelIndex].SceneName);
+        StartCoroutine(SceneController.Instance.StartMyServer(true, levels[currentLevelIndex].SceneName));
     }
 }

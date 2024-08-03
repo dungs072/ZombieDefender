@@ -53,6 +53,7 @@ public class GameController : NetworkBehaviour
     }
     private void TriggerZombie(ZombieTrigger zombieTrigger)
     {
+        if (audioSource == null) return;
         audioSource.PlayOneShot(hornSound);
         aIManager.startZombie = true;
     }
@@ -75,10 +76,14 @@ public class GameController : NetworkBehaviour
 
     public void ResetPlayer()
     {
-        ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer.ResetPlayer();
+        tankSourceSound.Stop();
+        var player = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
+        player.ResetPlayer();
+        player.GetComponent<Achievement>().ResetKill();
         inGameUI.ToggleGameOver(false);
         aIManager.ResetZombies();
         SpawnExistingZombies();
+
 
         foreach (var spawner in spawners)
         {

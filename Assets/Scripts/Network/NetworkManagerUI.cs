@@ -15,14 +15,7 @@ public class NetworkManagerUI : MonoBehaviour
     {
         if (NetworkManager.Singleton != null)
         {
-            if (NetworkManager.Singleton.IsServer)
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-            else if (NetworkManager.Singleton.IsClient)
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
+            NetworkManager.Singleton.Shutdown();
         }
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }

@@ -115,16 +115,18 @@ public class AIManager : NetworkBehaviour
     {
         for (int i = 0; i < aIControllers.Count; i++)
         {
+            aIControllers[i].GetComponent<Health>().SetDie();
             if (aIControllers[i].gameObject.activeSelf)
             {
-                aIControllers[i].Die();
+
+                //aIControllers[i].Die();
             }
         }
         for (int i = 0; i < bossControllers.Count; i++)
         {
             if (bossControllers[i].gameObject.activeSelf)
             {
-                bossControllers[i].Die();
+                bossControllers[i].GetComponent<Health>().SetDie();
             }
         }
 

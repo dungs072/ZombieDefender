@@ -38,6 +38,7 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private float fadeDuration = 0.4f;
     [Header("Game Over")]
     [SerializeField] private RectTransform gameOverPanel;
+    [SerializeField] private TMP_Text killText;
     [SerializeField] private RectTransform gameOverPVPPanel;
     [SerializeField] private TMP_Text spawnTimeText;
     [Header("Main Game")]
@@ -200,6 +201,10 @@ public class InGameUI : MonoBehaviour
 
         string GetStringValue(string key)
         {
+            if (lobby == null)
+            {
+                return "PVE";
+            }
             return lobby.Data[key].Value;
         }
         if (mode == "PVP")
@@ -209,6 +214,7 @@ public class InGameUI : MonoBehaviour
         else
         {
             ToggleGameOver(true);
+            SetKillCountText(score.text);
         }
 
     }
@@ -237,6 +243,10 @@ public class InGameUI : MonoBehaviour
                 gameOverPanel.gameObject.SetActive(state);
             });
         }
+    }
+    public void SetKillCountText(string text)
+    {
+        killText.text = text;
     }
     public void TogglePVPGameOver(bool state)
     {

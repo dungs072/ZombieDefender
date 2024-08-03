@@ -17,7 +17,11 @@ public class ScoreBoardUI : MonoBehaviour
     }
     public void TogglePVPGameOver(bool state)
     {
-        mainGamePanel.gameObject.SetActive(!state);
+        if (mainGamePanel != null)
+        {
+            mainGamePanel.gameObject.SetActive(!state);
+        }
+
         blackout.SetActive(state);
         if (state)
         {

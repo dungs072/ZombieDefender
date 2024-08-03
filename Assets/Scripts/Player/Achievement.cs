@@ -25,6 +25,7 @@ public class Achievement : NetworkBehaviour
     {
         SendKillScoreToServerRpc(playerId, 1);
     }
+
     [Rpc(SendTo.Server)]
     private void SendKillScoreToServerRpc(ulong playerId, int score)
     {
@@ -66,5 +67,9 @@ public class Achievement : NetworkBehaviour
     {
         currentKills -= amount;
         KillsChanged?.Invoke(currentKills.ToString());
+    }
+    public void ResetKill()
+    {
+        MinusKill(currentKills);
     }
 }

@@ -62,6 +62,7 @@ public class NetworkObjectPool : NetworkBehaviour
     }
     public void ReturnNetworkObject(NetworkObject networkObject, GameObject prefab)
     {
+        if (!m_PooledObjects.ContainsKey(prefab)) return;
         m_PooledObjects[prefab].Release(networkObject);
 
     }

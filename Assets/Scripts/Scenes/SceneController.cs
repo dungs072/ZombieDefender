@@ -7,6 +7,7 @@ public class SceneController : NetworkBehaviour
 {
     [SerializeField] private LoadingUI loadingUI;
 
+    public LoadingUI LoadingUI { set { loadingUI = value; } }
     public bool IsLoadCurrentSceneFinished { get; private set; } = false;
     public static SceneController Instance { get; private set; }
     private void Awake()
@@ -21,6 +22,7 @@ public class SceneController : NetworkBehaviour
             Destroy(gameObject);
         }
     }
+
     public override void OnNetworkSpawn()
     {
         NetworkManager.Singleton.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
@@ -29,11 +31,16 @@ public class SceneController : NetworkBehaviour
     {
         //NetworkManager.Singleton.SceneManager.OnSceneEvent -= SceneManager_OnSceneEvent;
     }
-    public void StartMyServer(bool isHost, string sceneName)
+    public IEnumerator StartMyServer(bool isHost, string sceneName)
     {
         // var success = false;
         if (isHost)
         {
+            while (NetworkManager.Singleton.IsListening)
+            {
+                yield return null;
+            }
+
             NetworkManager.Singleton.StartHost();
         }
         // else
@@ -175,7 +182,11 @@ public class SceneController : NetworkBehaviour
     }
     private IEnumerator UpdateLoadingProgress(AsyncOperation asyncOperation)
     {
-        loadingUI.gameObject.SetActive(true);
+        if (loadingUI != null)
+        {
+            loadingUI.gameObject.SetActive(true);
+        }
+
         asyncOperation.allowSceneActivation = false;
         while (!asyncOperation.isDone)
         {

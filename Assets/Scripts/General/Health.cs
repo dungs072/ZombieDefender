@@ -24,6 +24,10 @@ public class Health : NetworkBehaviour
     {
         Reset();
     }
+    public void SetDie()
+    {
+        TakeDamage(120000, currentHealth);
+    }
     public void TakeDamage(ulong killerId, int damage)
     {
         if (!IsOwner) { return; }

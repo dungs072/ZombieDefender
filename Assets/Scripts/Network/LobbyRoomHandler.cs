@@ -39,10 +39,12 @@ public class LobbyRoomHandler : NetworkBehaviour
 
     private void PropagateToClients()
     {
+        if (MatchMaking.GetCurrentLobby() == null) return;
+        if (_playersInLobby == null) return;
         foreach (var player in _playersInLobby) UpdatePlayerClientRpc(player.Key, player.Value);
     }
 
-    [ClientRpc]
+    [Rpc(SendTo.Everyone)]
     private void UpdatePlayerClientRpc(ulong clientId, bool isReady)
     {
         if (IsServer) return;
@@ -128,7 +130,7 @@ public class LobbyRoomHandler : NetworkBehaviour
     {
         await MatchMaking.LockLobby();
         Lobby lobby = MatchMaking.GetCurrentLobby();
-        SceneController.Instance.StartMyServer(false, GetStringValue(Constants.MapNameKey));
+        StartCoroutine(SceneController.Instance.StartMyServer(false, GetStringValue(Constants.MapNameKey)));
 
         string GetStringValue(string key)
         {
