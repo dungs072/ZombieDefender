@@ -22,6 +22,8 @@ public class TimeManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+
+
         InGameUI.GameOverPVPUIOn += () =>
         {
             StartCoroutine(CountSpawnTimeDown());
@@ -62,9 +64,15 @@ public class TimeManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     private void CountDownClientsRpc(int currentMinute, int currentSecond)
     {
+        if (IsServer) return;
         this.currentMinute = currentMinute;
         this.currentSecond = currentSecond;
         timeManagerUI.SetTimeText(currentMinute, currentSecond);
+        if (currentMinute == 0 && currentSecond == 0)
+        {
+            TimeOut?.Invoke();
+        }
+
     }
 
     private IEnumerator CountSpawnTimeDown()

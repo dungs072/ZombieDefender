@@ -59,6 +59,11 @@ public class SceneController : NetworkBehaviour
 
         //return success;
     }
+    public void LoadScene(string sceneName)
+    {
+        NetworkManager.Singleton.Shutdown();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
 
     public void StartMyClient(string sceneName)
     {
@@ -196,8 +201,8 @@ public class SceneController : NetworkBehaviour
             loadingUI.SetLoadingProgress(progress);
             if (asyncOperation.progress >= 0.9f)
             {
-                loadingUI.SetLoadingText("Press any key to continue");
-                if (Input.anyKey)
+                loadingUI.SetLoadingText("Press space key to play");
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
                     IsLoadCurrentSceneFinished = true;
                     asyncOperation.allowSceneActivation = true;

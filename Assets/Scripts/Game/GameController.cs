@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -5,7 +6,7 @@ using UnityEngine;
 
 public class GameController : NetworkBehaviour
 {
-
+    public static event Action GameWin;
     [SerializeField] private List<Spawner> spawners;
     [SerializeField] private List<Spawner> bossSpawners;
     [SerializeField] private AIManager aIManager;
@@ -107,10 +108,12 @@ public class GameController : NetworkBehaviour
             bossController.GetComponent<Health>().CharacterDied += () =>
             {
                 ToggleTankSourceSound(false);
-                foreach (var spawner in spawners)
-                {
-                    spawner.ResetSpawner();
-                }
+                // foreach (var spawner in spawners)
+                // {
+                //     spawner.ResetSpawner();
+                // }
+                GameWin?.Invoke();
+
             };
         }
         ToggleTankSourceSound(true);

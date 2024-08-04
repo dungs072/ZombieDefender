@@ -10,11 +10,7 @@ public class WeaponItem : Item
     public override void PickUpItem(PlayerController player)
     {
         var weaponManager = player.GetComponent<WeaponManager>();
-        GameObject weaponPrefab = LoadWeapon(weaponName.ToString());
-        var weaponInstance = Instantiate(weaponPrefab, weaponManager.GetWeaponPack());
-
-        weaponInstance.GetComponent<NetworkObject>().Spawn(true);
-        weaponManager.AddWeapon(weaponInstance.GetComponent<Weapon>());
+        weaponManager.AddWeapon(weaponName);
         base.PickUpItem(player);
     }
 

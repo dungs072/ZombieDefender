@@ -6,7 +6,7 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] private List<Level> levels;
-    private int currentLevelIndex = -1;
+    private static int currentLevelIndex = -1;
 
     public void ChooseLevel(Level level)
     {
@@ -42,7 +42,34 @@ public class LevelManager : MonoBehaviour
 
     public void PlayLevel()
     {
-        if (currentLevelIndex == -1) return;
+        if (currentLevelIndex == -1) currentLevelIndex = 0;
         StartCoroutine(SceneController.Instance.StartMyServer(true, levels[currentLevelIndex].SceneName));
     }
+    public void PlayLevelAgain()
+    {
+        if (currentLevelIndex == -1) currentLevelIndex = 0;
+
+        SceneController.Instance.LoadScene(levels[currentLevelIndex].SceneName);
+    }
+    public void PlayNextLevel()
+    {
+        if (currentLevelIndex == -1) currentLevelIndex = 0;
+        currentLevelIndex = GetNextLevel();
+
+        StartCoroutine(SceneController.Instance.StartMyServer(true, levels[currentLevelIndex].SceneName));
+    }
+
+    public static void SaveFinishLevel()
+    {
+        PlayerPrefs.SetInt("level", currentLevelIndex);
+    }
+    public static int GetNextLevel()
+    {
+        if (!PlayerPrefs.HasKey("level"))
+        {
+            return 0;
+        }
+        return PlayerPrefs.GetInt("level") + 1;
+    }
+
 }

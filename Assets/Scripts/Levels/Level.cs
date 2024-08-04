@@ -16,7 +16,16 @@ public class Level : MonoBehaviour
 
     private void Start()
     {
-        icon.sprite = notAchievedSprite;
+        if (icon == null) return;
+        if (isAchieved)
+        {
+            icon.sprite = achievedSprite;
+        }
+        else
+        {
+            icon.sprite = notAchievedSprite;
+        }
+
     }
     public void SetAchieve(bool state)
     {

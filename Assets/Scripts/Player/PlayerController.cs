@@ -1,8 +1,10 @@
 using System;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
+    public static event Action PlayerDataChanged;
     public static event Action<PlayerController> PlayerSpawned;
     public event Action CharacterDiedUI;
     public static event Action<PlayerController> PlayerDespawned;
@@ -15,9 +17,14 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private PickupHandler pickupHandler;
     [SerializeField] private ThrowHandler throwHandler;
+    [SerializeField] private PlayerData playerData;
     private Energy energy;
     private Health health;
-
+    public PlayerData PlayerData
+    {
+        get { return playerData; }
+        set { playerData = value; }
+    }
 
 
     public override void OnNetworkSpawn()
@@ -29,6 +36,18 @@ public class PlayerController : NetworkBehaviour
 
         }
         if (!IsOwner) return;
+
+        playerData.playerId = NetworkObjectId;
+        if (PlayerPrefs.HasKey("Name"))
+        {
+            playerData.playerName = PlayerPrefs.GetString("Name");
+        }
+        playerData.isReady = true;
+        PlayerDataTransport playerDataTransport = new PlayerDataTransport(PlayerData);
+        SendDataServerRpc(playerDataTransport);
+
+
+
         energy = GetComponent<Energy>();
         health = GetComponent<Health>();
         health.CharacterDied += HandleDeath;
@@ -36,6 +55,28 @@ public class PlayerController : NetworkBehaviour
 
         Invoke(nameof(WaitToSetUp), Const.ReloadingTimeAdded);
     }
+    public void SetReady(bool isReady)
+    {
+        playerData.isReady = isReady;
+        PlayerDataTransport playerDataTransport = new PlayerDataTransport(PlayerData);
+        SendDataServerRpc(playerDataTransport);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SendDataServerRpc(PlayerDataTransport playerDataTransport)
+    {
+        SendDataClientRpc(playerDataTransport);
+        PlayerDataChanged?.Invoke();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SendDataClientRpc(PlayerDataTransport playerDataTransport)
+    {
+        if (IsOwner) return;
+        PlayerData.SetData(playerDataTransport);
+
+
+    }
+
     private void HandleInputRegister()
     {
         inputHandler.WeaponReloaded += HandleReloadWeapon;

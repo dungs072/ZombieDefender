@@ -10,6 +10,7 @@ public class ZombieTrigger : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerController player))
         {
+
             ZombieTriggered?.Invoke(this);
             gameObject.SetActive(false);
         }

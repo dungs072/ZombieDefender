@@ -37,8 +37,9 @@ public class WeaponManager : NetworkBehaviour
         currentWeaponIndex = currentWeaponIndex - 1 >= 0 ? currentWeaponIndex - 1 : weapons.Count - 1;
         SetCurrentWeapon(weapons[currentWeaponIndex]);
     }
-    public void AddWeapon(Weapon weapon)
+    public void AddWeapon(WeaponName weaponName)
     {
+        var weapon = GetWeapon(weaponName);
         weapons.Add(weapon);
         currentWeaponIndex = weapons.Count - 1;
         if (weapon is ShootWeapon)
@@ -53,6 +54,17 @@ public class WeaponManager : NetworkBehaviour
         SetCurrentWeapon(weapons[currentWeaponIndex]);
 
     }
+    private Weapon GetWeapon(WeaponName weaponName)
+    {
+        foreach (var weapon in weaponResources)
+        {
+            if (weapon.GetWeaponName() == weaponName)
+            {
+                return weapon;
+            }
+        }
+        return null;
+    }
     public void RemoveLastWeapon()
     {
         currentWeaponIndex = 0;
@@ -63,7 +75,7 @@ public class WeaponManager : NetworkBehaviour
     public void SpawnRandomWeapon()
     {
         int weaponIndex = UnityEngine.Random.Range(0, weaponResources.Count);
-        AddWeapon(weaponResources[weaponIndex]);
+        AddWeapon(weaponResources[weaponIndex].GetWeaponName());
 
     }
     private IEnumerator DelaySetUp(Weapon weaponInstance)

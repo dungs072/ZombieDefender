@@ -10,11 +10,15 @@ public class LobbyRoomHandler : NetworkBehaviour
 {
     private readonly Dictionary<ulong, bool> _playersInLobby = new();
     public static event Action<Dictionary<ulong, bool>> LobbyPlayersUpdated;
+    public static event Action<bool> ClientConnected;
+    private bool isReady = false;
     public override void OnNetworkSpawn()
     {
+
         if (IsServer)
         {
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
+            PlayerController.PlayerDataChanged += PropagateToClients;
             _playersInLobby.Add(NetworkManager.Singleton.LocalClientId, false);
             UpdateInterface();
         }
@@ -22,6 +26,13 @@ public class LobbyRoomHandler : NetworkBehaviour
         // Client uses this in case host destroys the lobby
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
 
+
+    }
+    public void SetReady()
+    {
+        isReady = !isReady;
+        var ownerPlayer = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
+        ownerPlayer.SetReady(isReady);
 
     }
 
@@ -41,14 +52,20 @@ public class LobbyRoomHandler : NetworkBehaviour
     {
         if (MatchMaking.GetCurrentLobby() == null) return;
         if (_playersInLobby == null) return;
-        foreach (var player in _playersInLobby) UpdatePlayerClientRpc(player.Key, player.Value);
+        if (_playersInLobby.Count == 1) return;
+        foreach (var player in _playersInLobby)
+        {
+            UpdatePlayerClientRpc(player.Key, player.Value);
+        }
+
     }
 
     [Rpc(SendTo.Everyone)]
     private void UpdatePlayerClientRpc(ulong clientId, bool isReady)
     {
-        if (IsServer) return;
 
+        if (IsServer) return;
+        if (_playersInLobby == null) return;
         if (!_playersInLobby.ContainsKey(clientId)) _playersInLobby.Add(clientId, isReady);
         else _playersInLobby[clientId] = isReady;
         UpdateInterface();
@@ -100,6 +117,7 @@ public class LobbyRoomHandler : NetworkBehaviour
     private void UpdateInterface()
     {
         LobbyPlayersUpdated?.Invoke(_playersInLobby);
+        ClientConnected?.Invoke(IsClient && !IsHost);
     }
 
     private async void OnLobbyLeft()

@@ -33,6 +33,7 @@ public class HandColliderManager : NetworkBehaviour
     }
     private void SpawnEffect(Vector3 spawnPos)
     {
+        if (this == null) return;
         var effectInstance = NetworkObjectPool.Singleton.
                                   GetNetworkObject(bloodHitEffect.gameObject,
                                       spawnPos, transform.rotation);

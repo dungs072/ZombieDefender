@@ -24,7 +24,6 @@ public class ScoreManager : NetworkBehaviour
     }
     public override void OnNetworkSpawn()
     {
-        if (!IsServer) return;
         List<PlayerController> players = ((CustomNetworkManager)NetworkManager.Singleton).Players;
         foreach (var player in players)
         {
@@ -36,11 +35,26 @@ public class ScoreManager : NetworkBehaviour
     public void AddScoreRpc(ulong playerId, int score)
     {
         playerScores[playerId] += score;
+        AddScoreClientRpc(playerId, score);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    public void AddScoreClientRpc(ulong playerId, int score)
+    {
+        if (IsServer) return;
+        playerScores[playerId] += score;
     }
 
     public void ClickNextButton()
     {
-        NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", LoadSceneMode.Single);
-        NetworkManager.Singleton.Shutdown();
+        if (NetworkManager.Singleton.IsListening)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("MainMenu", LoadSceneMode.Single);
+            NetworkManager.Singleton.Shutdown();
+        }
+        else
+        {
+            SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
+        }
+
     }
 }

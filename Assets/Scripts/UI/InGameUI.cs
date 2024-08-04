@@ -6,6 +6,7 @@ using TMPro;
 using System;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
+using UnityEngine.SceneManagement;
 public class InGameUI : MonoBehaviour
 {
     public static event Action GameOverPVPUIOn;
@@ -43,6 +44,11 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private TMP_Text spawnTimeText;
     [Header("Main Game")]
     [SerializeField] private RectTransform mainGamePanel;
+    [Header("Game Win")]
+    [SerializeField] private RectTransform gameWinPanel;
+    [SerializeField] private TMP_Text winKillText;
+    [Header("Loading scene")]
+    [SerializeField] private LoadingUI loadingUI;
 
     private void Start()
     {
@@ -65,6 +71,13 @@ public class InGameUI : MonoBehaviour
         };
         TimeManager.CountingDownSpawnTime += SetGameOverRespawnText;
         SetScore("0");
+
+        SceneController.Instance.LoadingUI = loadingUI;
+        GameController.GameWin += () =>
+        {
+            ToggleGameWin(true);
+            SetWinKillText(score.text);
+        };
 
     }
 
@@ -207,6 +220,7 @@ public class InGameUI : MonoBehaviour
             }
             return lobby.Data[key].Value;
         }
+        //var players = ((CustomNetworkManager)NetworkManager.Singleton).Players;
         if (mode == "PVP")
         {
             TogglePVPGameOver(true);
@@ -247,6 +261,32 @@ public class InGameUI : MonoBehaviour
     public void SetKillCountText(string text)
     {
         killText.text = text;
+    }
+    public void ToggleGameWin(bool state)
+    {
+        gameWinPanel.gameObject.SetActive(!state);
+        blackout.SetActive(state);
+        if (state)
+        {
+            gameWinPanel.gameObject.SetActive(state);
+
+            if (gameWinPanel.localScale != Vector3.zero)
+            {
+                gameWinPanel.localScale = Vector3.zero;
+            }
+            LeanTween.scale(gameWinPanel, Vector3.one, 0.3f).setEase(LeanTweenType.easeInOutSine);
+        }
+        else
+        {
+            LeanTween.scale(gameWinPanel, Vector3.zero, 0.3f).setEase(LeanTweenType.easeInOutSine).setOnComplete(() =>
+            {
+                gameWinPanel.gameObject.SetActive(state);
+            });
+        }
+    }
+    public void SetWinKillText(string text)
+    {
+        winKillText.text = text;
     }
     public void TogglePVPGameOver(bool state)
     {

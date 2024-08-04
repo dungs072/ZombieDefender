@@ -17,10 +17,15 @@ public class Projectile : NetworkBehaviour
     private NetworkVariable<ulong> ownerIdNetwork = new NetworkVariable<ulong>(default,
                                                 NetworkVariableReadPermission.Everyone,
                                                 NetworkVariableWritePermission.Server);
-
+    private ulong networkId;
     public void SetOwnerIdServer(ulong networkId)
     {
-        ownerIdNetwork.Value = networkId;
+        this.networkId = networkId;
+        if (IsSpawned)
+        {
+            ownerIdNetwork.Value = networkId;
+        }
+
     }
 
     private List<Effect> effects = new List<Effect>();
@@ -47,7 +52,9 @@ public class Projectile : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+
         if (!IsServer) { return; }
+        ownerIdNetwork.Value = networkId;
         Invoke("Deactivate", lifetime);
     }
     public override void OnNetworkDespawn()

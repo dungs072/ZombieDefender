@@ -36,4 +36,15 @@ public class CustomNetworkManager : NetworkManager
     {
         players.Remove(player);
     }
+    public PlayerData GetPlayerData(ulong playerId)
+    {
+        foreach (var player in players)
+        {
+            if (player.NetworkObjectId == playerId)
+            {
+                return player.PlayerData;
+            }
+        }
+        return null;
+    }
 }
