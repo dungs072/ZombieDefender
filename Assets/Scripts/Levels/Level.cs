@@ -10,8 +10,10 @@ public class Level : MonoBehaviour
     [SerializeField] private Image icon;
     [SerializeField] private bool isAchieved;
     [SerializeField] private string sceneName;
+    [SerializeField] private string levelName;
 
     public string SceneName { get { return sceneName; } }
+    public string LevelName { get { return levelName; } }
     public bool IsAchieved { get { return isAchieved; } }
 
     private void Start()

@@ -72,7 +72,7 @@ public static class MatchMaking
             Data = new Dictionary<string, DataObject> {
                 { Constants.JoinKey, new DataObject(DataObject.VisibilityOptions.Member, joinCode) },
                 { Constants.GameTypeKey, new DataObject(DataObject.VisibilityOptions.Public, data.Type, DataObject.IndexOptions.S5) },
-                { Constants.MapNameKey, new DataObject(DataObject.VisibilityOptions.Public, data.MapName, DataObject.IndexOptions.S4) },
+                { Constants.MapIdKey, new DataObject(DataObject.VisibilityOptions.Public, data.MapId.ToString(), DataObject.IndexOptions.N3) },
                 {
                     Constants.DifficultyKey,
                     new DataObject(DataObject.VisibilityOptions.Public, data.Difficulty.ToString(), DataObject.IndexOptions.N2)
@@ -140,16 +140,22 @@ public static class MatchMaking
         _updateLobbySource?.Cancel();
 
         if (_currentLobby != null)
-            try
+        {
+            if (_currentLobby.HostId == Authentication.PlayerId)
             {
-                if (_currentLobby.HostId == Authentication.PlayerId) await Lobbies.Instance.DeleteLobbyAsync(_currentLobby.Id);
-                else await Lobbies.Instance.RemovePlayerAsync(_currentLobby.Id, Authentication.PlayerId);
-                _currentLobby = null;
+                await Lobbies.Instance.DeleteLobbyAsync(_currentLobby.Id);
             }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+            else await Lobbies.Instance.RemovePlayerAsync(_currentLobby.Id, Authentication.PlayerId);
+            _currentLobby = null;
+        }
+        // try
+        // {
+
+        // }
+        // catch (Exception e)
+        // {
+        //     Debug.Log(e);
+        // }
     }
 }
 public struct LobbyData
@@ -158,7 +164,7 @@ public struct LobbyData
     public int MaxPlayers;
     public int Difficulty;
     public string Type;
-    public string MapName;
+    public int MapId;
 
-    public override string ToString() => $"{Name} ({MaxPlayers}) ({Difficulty}) ({Type}) ({MapName})";
+    public override string ToString() => $"{Name} ({MaxPlayers}) ({Difficulty}) ({Type}) ({MapId})";
 }

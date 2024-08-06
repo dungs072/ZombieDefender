@@ -9,12 +9,7 @@ public class MoneyManager : MonoBehaviour
     [SerializeField] private int initialMoney = 10;
     private int currentMoney = 0;
     public int CurrentMoney { get { return currentMoney; } }
-    private void Start()
-    {
-        Invoke(nameof(InitMoney), 2);
-
-    }
-    private void InitMoney()
+    public void InitMoney()
     {
         AddMoney(initialMoney);
     }

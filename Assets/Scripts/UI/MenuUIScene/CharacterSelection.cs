@@ -84,6 +84,7 @@ public class CharacterSelection : MonoBehaviour
     }
     public void LoadData(int id)
     {
+        nameInput.text = PlayerPrefs.GetString("Name");
         foreach (CharacterUI characterUI in characterUIs)
         {
             if (characterUI.Id == id)
@@ -92,6 +93,6 @@ public class CharacterSelection : MonoBehaviour
                 break;
             }
         }
-        nameInput.text = PlayerPrefs.GetString("Name");
+
     }
 }

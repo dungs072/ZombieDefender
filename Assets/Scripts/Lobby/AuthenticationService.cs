@@ -8,12 +8,10 @@ public static class Authentication
 
     public static async Task Login()
     {
+        if (PlayerId != null) return;
         if (UnityServices.State == ServicesInitializationState.Uninitialized)
         {
             var options = new InitializationOptions();
-
-
-
             await UnityServices.InitializeAsync(options);
         }
 

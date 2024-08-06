@@ -7,10 +7,12 @@ using UnityEngine;
 public class CustomNetworkManager : NetworkManager
 {
     public static event Action PlayerAdded;
+    public static event Action PlayerRemoved;
     private List<PlayerController> players = new List<PlayerController>();
     public PlayerController OwnerPlayer { get; private set; }
     public List<PlayerController> Players { get { return players; } }
     private static CustomNetworkManager instance;
+
     private void Awake()
     {
         if (instance == null)
@@ -35,6 +37,7 @@ public class CustomNetworkManager : NetworkManager
     public void RemovePlayer(PlayerController player)
     {
         players.Remove(player);
+        PlayerRemoved?.Invoke();
     }
     public PlayerData GetPlayerData(ulong playerId)
     {

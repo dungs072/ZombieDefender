@@ -13,6 +13,22 @@ public class PlayerAnimator : NetworkBehaviour
     private readonly float CrossFadeInFixedTime = 0.1f;
     [SerializeField] private Animator animator;
     [SerializeField] private List<AnimatorOverrideNetwork> overrideNetworks;
+    [SerializeField] private RuntimeAnimatorController female;
+    [SerializeField] private RuntimeAnimatorController male;
+    private int characterId = 1;
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner) return;
+        characterId = PlayerPrefs.GetInt("Id");
+        if (characterId == 1)
+        {
+            animator.runtimeAnimatorController = female;
+        }
+        else if (characterId == 2)
+        {
+            animator.runtimeAnimatorController = male;
+        }
+    }
 
     public void PlayLocomtionAnimation(bool isMoving)
     {
@@ -35,17 +51,25 @@ public class PlayerAnimator : NetworkBehaviour
         if (animatorOverride != null)
         {
             animator.runtimeAnimatorController = animatorOverride;
-            ChangeOverrideAnimatorClientRpc(Id);
+            ChangeOverrideAnimatorClientRpc(Id, characterId);
         }
     }
     [Rpc(SendTo.Everyone)]
-    private void ChangeOverrideAnimatorClientRpc(int Id)
+    private void ChangeOverrideAnimatorClientRpc(int Id, int typeId)
     {
         foreach (var network in overrideNetworks)
         {
             if (network.Id == Id)
             {
-                animator.runtimeAnimatorController = network.overrideController;
+                if (typeId == 1)
+                {
+                    animator.runtimeAnimatorController = network.femaleOverrideController;
+                }
+                else if (typeId == 2)
+                {
+                    animator.runtimeAnimatorController = network.maleOverrideController;
+                }
+
             }
         }
     }
@@ -55,5 +79,6 @@ public class PlayerAnimator : NetworkBehaviour
 class AnimatorOverrideNetwork
 {
     public int Id;
-    public AnimatorOverrideController overrideController;
+    public AnimatorOverrideController maleOverrideController;
+    public AnimatorOverrideController femaleOverrideController;
 }

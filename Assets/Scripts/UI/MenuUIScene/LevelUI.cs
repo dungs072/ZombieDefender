@@ -1,13 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class LevelUI : MonoBehaviour
 {
+
     [SerializeField] private RectTransform levelUI;
     [SerializeField] private List<Level> levels;
-
-
+    [SerializeField] private TMP_Text mapName;
+    private void Awake()
+    {
+        LevelManager.LevelSelected += SetMapName;
+    }
+    private void Start()
+    {
+        SetMapName("");
+    }
 
     public void HandleSinglePlayClick()
     {
@@ -31,5 +40,9 @@ public class LevelUI : MonoBehaviour
                 levelUI.gameObject.SetActive(state);
             });
         }
+    }
+    public void SetMapName(string text)
+    {
+        mapName.text = text;
     }
 }

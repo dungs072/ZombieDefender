@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -5,6 +6,7 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
+    public static event Action<string> LevelSelected;
     [SerializeField] private List<Level> levels;
     private static int currentLevelIndex = -1;
 
@@ -37,6 +39,10 @@ public class LevelManager : MonoBehaviour
         foreach (Level level in levels)
         {
             level.ToggleSelectingIcon(selectedLevel == level);
+            if (selectedLevel == level)
+            {
+                LevelSelected?.Invoke(level.LevelName);
+            }
         }
     }
 

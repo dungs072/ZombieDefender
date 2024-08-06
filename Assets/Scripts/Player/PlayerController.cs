@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
+
     public static event Action PlayerDataChanged;
     public static event Action<PlayerController> PlayerSpawned;
     public event Action CharacterDiedUI;
@@ -71,8 +72,8 @@ public class PlayerController : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void SendDataClientRpc(PlayerDataTransport playerDataTransport)
     {
-        if (IsOwner) return;
         PlayerData.SetData(playerDataTransport);
+        PlayerDataChanged?.Invoke();
 
 
     }

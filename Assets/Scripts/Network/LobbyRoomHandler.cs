@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class LobbyRoomHandler : NetworkBehaviour
 {
+    [SerializeField] private MapData mapData;
+    public static event Action ExitingLobby;
     private readonly Dictionary<ulong, bool> _playersInLobby = new();
     public static event Action<Dictionary<ulong, bool>> LobbyPlayersUpdated;
     public static event Action<bool> ClientConnected;
@@ -18,14 +20,14 @@ public class LobbyRoomHandler : NetworkBehaviour
         if (IsServer)
         {
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
-            PlayerController.PlayerDataChanged += PropagateToClients;
+
             _playersInLobby.Add(NetworkManager.Singleton.LocalClientId, false);
             UpdateInterface();
         }
 
         // Client uses this in case host destroys the lobby
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-
+        PlayerController.PlayerDataChanged += UpdateInterface;
 
     }
     public void SetReady()
@@ -82,14 +84,16 @@ public class LobbyRoomHandler : NetworkBehaviour
             RemovePlayerClientRpc(playerId);
 
             UpdateInterface();
+
+
         }
-        else
+        if (OwnerClientId == playerId)
         {
-            // This happens when the host disconnects the lobby
-            // _roomScreen.gameObject.SetActive(false);
-            // _mainLobbyScreen.gameObject.SetActive(true);
             OnLobbyLeft();
+            ExitingLobby?.Invoke();
         }
+
+
     }
 
     [ClientRpc]
@@ -148,11 +152,22 @@ public class LobbyRoomHandler : NetworkBehaviour
     {
         await MatchMaking.LockLobby();
         Lobby lobby = MatchMaking.GetCurrentLobby();
-        StartCoroutine(SceneController.Instance.StartMyServer(false, GetStringValue(Constants.MapNameKey)));
+        int mapId = GetMapId(Constants.MapIdKey);
+        string typeGame = GetType(Constants.GameTypeKey);
+        MapItemData mapItemData = mapData.GetMapItemData(mapId);
+        StartCoroutine(SceneController.Instance.StartMyServer(false, mapItemData.sceneName + typeGame));
 
-        string GetStringValue(string key)
+        int GetMapId(string key)
+        {
+            return int.Parse(lobby.Data[key].Value);
+        }
+        string GetType(string key)
         {
             return lobby.Data[key].Value;
         }
+    }
+    public void OnGameExit()
+    {
+        OnClientDisconnectCallback(OwnerClientId);
     }
 }

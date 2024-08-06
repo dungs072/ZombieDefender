@@ -29,5 +29,9 @@ public class Movement : MonoBehaviour
     {
         runningSpeed += speed;
     }
+    public void SetMovementSpeed(float speed)
+    {
+        this.speed = speed;
+    }
 
 }

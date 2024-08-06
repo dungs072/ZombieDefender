@@ -17,6 +17,7 @@ public class ListLobbyUI : MonoBehaviour
 
     public async void FindLobbies()
     {
+        await Authentication.Login();
         foreach (var item in lobbyItems)
         {
             Destroy(item.gameObject);
@@ -35,6 +36,26 @@ public class ListLobbyUI : MonoBehaviour
             lobbyItems.Add(panel);
         }
         TogglePanel(true);
+    }
+    public async void RefreshLobby()
+    {
+        foreach (var item in lobbyItems)
+        {
+            Destroy(item.gameObject);
+
+        }
+        lobbyItems.Clear();
+        var allLobbies = await MatchMaking.GatherLobbies();
+
+        var lobbyIds = allLobbies.Where(l => l.HostId != Authentication.PlayerId).Select(l => l.Id);
+
+        foreach (var lobby in allLobbies)
+        {
+            var panel = Instantiate(lobbyPrefab, content);
+            panel.Init(lobby);
+            panel.LobbyJoined += JoinLobby;
+            lobbyItems.Add(panel);
+        }
     }
     public async void JoinLobby(Lobby lobby)
     {

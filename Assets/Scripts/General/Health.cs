@@ -74,4 +74,11 @@ public class Health : NetworkBehaviour
         HealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
+    public void SetMaxHealth(int amount)
+    {
+        maxHealth = amount;
+        currentHealth = amount;
+        HealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
 }

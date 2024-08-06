@@ -52,8 +52,15 @@ public class InGameUI : MonoBehaviour
 
     private void Start()
     {
+
+        StartCoroutine(SetUpData());
+
+    }
+    private IEnumerator SetUpData()
+    {
         var ownedPlayer = ((CustomNetworkManager)NetworkManager.Singleton).OwnerPlayer;
-        HandlePlayerSpawned(ownedPlayer);
+        while (ownedPlayer == null) yield return null;
+
 
         PickupHandler.ItemPicked += TogglePickupImage;
         PickupHandler.HoldingPickup += SetReloadingBar;
@@ -78,6 +85,7 @@ public class InGameUI : MonoBehaviour
             ToggleGameWin(true);
             SetWinKillText(score.text);
         };
+        HandlePlayerSpawned(ownedPlayer);
 
     }
 
@@ -115,6 +123,7 @@ public class InGameUI : MonoBehaviour
     {
         var health = player.GetComponent<Health>();
         var energy = player.GetComponent<Energy>();
+        var money = player.GetComponent<MoneyManager>();
         health.HealthChanged += UpdateHealthBar;
         health.TakingDamage += FadeBloodImageIn;
         energy.EnergyChanged += UpdateEnergyBar;
@@ -122,6 +131,7 @@ public class InGameUI : MonoBehaviour
 
         health.TakeDamage(health.NetworkObjectId, 0);
         energy.UseEnergy(0);
+        money.InitMoney();
 
     }
     private void HandlePlayerDespawned(PlayerController player)
@@ -162,6 +172,7 @@ public class InGameUI : MonoBehaviour
     }
     public void SetMoneyText(string text)
     {
+        if (moneyText == null) return;
         moneyText.text = text;
     }
     public void ToggleHoldingMenu(bool state)

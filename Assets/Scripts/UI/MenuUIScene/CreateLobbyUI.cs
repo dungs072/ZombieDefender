@@ -12,22 +12,43 @@ public class CreateLobbyUI : MonoBehaviour
     [SerializeField] private GameObject blackout;
     [SerializeField] private TMP_InputField lobbyNameInput;
     [SerializeField] private TMP_InputField maxPlayerInput;
-    [SerializeField] private Toggle pvpToggle;
+    [SerializeField] private TMP_Dropdown typeDropDown;
     [SerializeField] private Image mapImage;
+    [SerializeField] private TMP_Text mapNameText;
+    [SerializeField] private MapData mapData;
 
-    private string mapName = "JungleScene";
+    private int mapId;
+    private string typeGame = "PVP";
+
+    private void Awake()
+    {
+        MapSelectionUI.MapChose += OnMapChose;
+    }
+    private void OnMapChose(int id)
+    {
+        MapItemData mapItem = mapData.GetMapItemData(id);
+        if (mapItem == null) return;
+        mapImage.sprite = mapItem.mapIcon;
+        mapNameText.text = mapItem.mapName;
+        mapId = id;
+    }
+    public void OnTypeGameChanged()
+    {
+        typeGame = typeDropDown.captionText.text;
+    }
 
     public async void CreateLobby()
     {
+        await Authentication.Login();
         string lobbyName = lobbyNameInput.text == "" ? "No name" : lobbyNameInput.text.Trim();
-        string type = pvpToggle.isOn ? "PVP" : "PVE";
+        string type = typeGame;
         LobbyData lobbyData = new LobbyData()
         {
             Name = lobbyName,
             Difficulty = 0,
             MaxPlayers = int.Parse(maxPlayerInput.text.Trim()),
             Type = type,
-            MapName = mapName + type,
+            MapId = mapId,
         };
         await MatchMaking.CreateLobbyWithAllocation(lobbyData, () =>
         {
